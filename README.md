@@ -11,15 +11,19 @@ It will:
 Q & A
 ------------------
 * Q: Which encodings are supported?
+
   A: Any encoding your system supported should be fine.
 
 * Q: Why does the content become a mess when the window is re-activated?
+
   A: Sublime Text will reload the file when it's changed outside. Please disable the autoReloadChanged setting of Sublime Text, or re-open the file.
 
 * Q: What does "Decode Failed: [123, 456]" in status bar mean?
+
   A: It means the line numbers which can't be decode correctly, those lines will be decoded to ISO-8859-1.
 
 * Q: When saving the file, Sublime Text tells me the file is saved as UTF-8, why?
+
   A: Don't worry, the plug-in will convert your file to original encoding.
 
 Contact me
