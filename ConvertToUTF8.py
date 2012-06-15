@@ -98,11 +98,17 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			view.settings().erase('prevent_undo')
 			view.set_status('origin_encoding', encoding)
 			return
+		load_setting = sublime.load_settings('ConvertToUTF8.sublime-settings').get('convert_on_load', 'always')
+		if load_setting == 'never':
+			return
 		result = detect(view.file_name())
 		encoding = result['encoding'].upper()
 		confidence = result['confidence']
 		if confidence < 0.7 or encoding in ('ASCII', 'UTF-8'):
 			return
+		# It's more compatible to use HKSCS instead of Big5
+		if encoding == 'BIG5':
+			encoding = 'BIG5-HKSCS'
 		view.settings().set('origin_encoding', encoding)
 		view.settings().set('prevent_undo', True)
 		view.set_status('origin_encoding', encoding)
@@ -124,7 +130,20 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		else:
 			view.set_scratch(False)
 
+	def on_pre_save(self, view):
+		if not view.settings().get('origin_encoding'):
+			return
+		settings = sublime.load_settings('ConvertToUTF8.sublime-settings')
+		save_setting = settings.get('convert_on_save', 'always')
+		if save_setting == 'never':
+			# Extra line will be created for each line if it's Windows format
+			view.set_line_endings('Unix')
+
 	def on_post_save(self, view):
 		if not view.settings().get('origin_encoding'):
+			return
+		settings = sublime.load_settings('ConvertToUTF8.sublime-settings')
+		save_setting = settings.get('convert_on_save', 'always')
+		if save_setting == 'never':
 			return
 		self.convert_from_utf8(view)
