@@ -11,7 +11,7 @@ Sublime Text 2目前不支持双字节编码，包括CJK用户经常使用的GB2
 ------------------
 推荐使用[Package Control](http://wbond.net/sublime_packages/package_control)查找 *ConvertToUTF8* 进行自动下载安装与更新。
 
-如需手工安装，请将本项目打包下载并解压，将解压后的文件夹名修改为*ConvertToUTF8*，然后将此文件夹移动到Sublime Text的 *Packages* 文件夹下（可通过Sublime Text菜单中的Preferences > Browse Packages找到 *Packages* 文件夹）。
+如需手工安装，请将本项目打包下载并解压，将解压后的文件夹名修改为 *ConvertToUTF8*，然后将此文件夹移动到Sublime Text的 *Packages* 文件夹下（可通过Sublime Text菜单中的Preferences > Browse Packages找到 *Packages* 文件夹）。
 
 设置
 ------------------
