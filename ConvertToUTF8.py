@@ -104,7 +104,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		result = detect(view.file_name())
 		encoding = result['encoding'].upper()
 		confidence = result['confidence']
-		if confidence < 0.7 or encoding in ('ASCII', 'UTF-8'):
+		if confidence < 0.7 or encoding in ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE'):
 			return
 		# It's more compatible to use HKSCS instead of Big5
 		if encoding == 'BIG5':
