@@ -1,4 +1,4 @@
-Description [中文说明](README.zh_CN.md)
+Description (中文说明见README.zh_CN.md)
 ------------------
 This Sublime Text 2 plug-in aims to help people view and edit text files which encodings are not supported currently by Sublime Text, especially for CJK users who using GB2312, GBK, BIG5, etc.
 
