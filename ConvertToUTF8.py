@@ -24,26 +24,27 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		encoding = view.settings().get('origin_encoding')
 		if not encoding:
 			return
+		file_name = view.file_name()
 		# try fast decode
 		try:
-			contents = codecs.open(view.file_name(), 'r', encoding, errors='strict').read()
+			contents = codecs.open(file_name, 'r', encoding, errors='strict').read()
 		except UnicodeDecodeError, e:
 			# try decode line by line
 			contents = ''
-			fp = file(view.file_name())
-			line = fp.readline()
+			fp = file(file_name, 'r')
 			fails = []
 			cnt = 0
-			while line != '':
+			for line in fp:
 				cnt += 1
 				try:
 					contents += line.decode(encoding)
 				except:
 					contents += line.decode('ISO-8859-1')
 					fails.append(cnt)
-				line = fp.readline()
 			fp.close()
 			view.set_status('decode_fail_line', 'Decode Failed: %r' % fails)
+		if view.line_endings() == 'Windows':
+			contents = contents.replace('\r\n', '\n').replace('\r', '\n')
 		regions = sublime.Region(0, view.size())
 		edit = view.begin_edit()
 		view.replace(edit, regions, contents)
@@ -62,20 +63,21 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		encoding = view.settings().get('origin_encoding')
 		if not encoding:
 			return
-		regions = sublime.Region(0, view.size())
+		file_name = view.file_name()
 		try:
-			contents = view.substr(regions).encode(encoding)
+			contents = codecs.EncodedFile(file(file_name, 'r'), encoding, 'UTF-8').read()
 		except UnicodeEncodeError, e:
+			fp = file(file_name, 'r')
 			contents = ''
-			for region in view.split_by_newlines(regions):
-				line = view.substr(view.full_line(region))
+			for line in fp:
 				try:
-					contents += line.encode(encoding)
+					contents += line.decode('UTF-8').encode(encoding)
 				except UnicodeEncodeError, e:
-					contents += line.encode('ISO-8859-1')
-		f = file(view.file_name(), 'w')
-		f.write(contents)
-		f.close()
+					contents += line.decode('UTF-8').encode('ISO-8859-1')
+			fp.close()
+		fp = file(view.file_name(), 'w')
+		fp.write(contents)
+		fp.close()
 		sublime.status_message('UTF8 -> %s' % encoding)
 
 	def description(self):
@@ -121,7 +123,10 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		if load_setting == 'never':
 			return
 		result = detect(view.file_name())
-		encoding = result['encoding'].upper()
+		encoding = result['encoding']
+		if not encoding:
+			return
+		encoding = encoding.upper()
 		confidence = result['confidence']
 		if confidence < 0.7 or encoding in ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE'):
 			return
@@ -171,13 +176,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 	def on_pre_save(self, view):
 		if not view.settings().get('origin_encoding'):
 			return
-		settings = sublime.load_settings('ConvertToUTF8.sublime-settings')
-		save_setting = settings.get('convert_on_save', 'always')
-		if save_setting == 'never':
-			# Extra line will be created for each line if it's Windows format
-			view.set_line_endings('Unix')
-		else:
-			view.set_encoding('UTF-8')
+		view.set_encoding('UTF-8')
 
 	def on_post_save(self, view):
 		if not view.settings().get('origin_encoding'):
