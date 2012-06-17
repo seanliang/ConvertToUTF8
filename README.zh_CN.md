@@ -27,7 +27,7 @@ Sublime Text 2目前不支持双字节编码，包括CJK用户经常使用的GB2
 
 * 问：为何有时重新激活窗口，里面的内容会变乱码？
 
-  答：文件被修改后，Sublime Text会重新装载，从而导致编码被重置。请将Sublime Text设定中的autoReloadChanged改为False或重新打开此文件即可。
+  答：此问题是由重新载入引起的，且已修复，请更新 *ConvertToUTF8* 插件到最新版本。
 
 * 问：状态栏中出现Decode Failed: [123, 456]，这是什么意思？
 

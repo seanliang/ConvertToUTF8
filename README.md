@@ -27,7 +27,7 @@ Q & A
 
 * Q: Why does the content become a mess when the window is re-activated?
 
-  A: Sublime Text will reload the file when it's changed outside. Please disable the autoReloadChanged setting of Sublime Text, or re-open the file.
+  A: This is caused by reloading and has been fixed, please update your *ConvertToUTF8* to latest version.
 
 * Q: What does "Decode Failed: [123, 456]" in status bar mean?
 
