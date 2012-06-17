@@ -92,7 +92,26 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 	def convert_from_utf8(self, view):
 		view.run_command('convert_from_utf8')
 
+	def on_clone(self, view):
+		clone_numbers = view.settings().get('clone_numbers', 0)
+		view.settings().set('clone_numbers', clone_numbers + 1)
+
+	def on_close(self, view):
+		clone_numbers = view.settings().get('clone_numbers', 0)
+		if clone_numbers:
+			view.settings().set('clone_numbers', clone_numbers - 1)
+
 	def on_load(self, view):
+		file_name = view.file_name()
+		if not file_name:
+			return
+		clone_numbers = view.settings().get('clone_numbers', 0)
+		if clone_numbers:
+			load_times = view.settings().get('load_times', clone_numbers - 1)
+			if load_times:
+				view.settings().set('load_times', load_times - 1)
+				return
+			view.settings().erase('load_times')
 		encoding = view.settings().get('origin_encoding')
 		if encoding:
 			view.settings().erase('prevent_undo')
@@ -119,12 +138,31 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			return
 		if not view.settings().get('origin_encoding'):
 			return
+		clone_numbers = view.settings().get('clone_numbers', 0)
+		if clone_numbers:
+			modified_times = view.settings().get('modified_times', clone_numbers)
+			if modified_times:
+				view.settings().set('modified_times', modified_times - 1)
+				return
+			view.settings().erase('modified_times')
 		if view.settings().get('scratch_flag'):
 			view.set_scratch(True)
 			view.settings().erase('scratch_flag')
 			return
 		# reach origin content
-		if view.command_history(0) == (None, None, 0):
+		command = view.command_history(0)
+		reverted = (command == (None, None, 0))
+		if command[0] == 'revert':
+			if view.command_history(1)[0] == 'convert_to_utf8':
+				reverted = True
+			elif view.settings().get('reverting'):
+				view.settings().erase('reverting')
+				reverted = True
+			else:
+				# revert will call on_modified twice
+				view.settings().set('reverting', True)
+				return
+		if reverted:
 			if view.settings().get('prevent_undo'):
 				self.convert_to_utf8(view)
 		else:
@@ -138,6 +176,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		if save_setting == 'never':
 			# Extra line will be created for each line if it's Windows format
 			view.set_line_endings('Unix')
+		else:
+			view.set_encoding('UTF-8')
 
 	def on_post_save(self, view):
 		if not view.settings().get('origin_encoding'):
