@@ -16,7 +16,19 @@ def detect(file_name):
 		if detector.done or cnt > 200:
 			break
 	detector.close()
-	return detector.result
+	encoding = detector.result['encoding']
+	if not encoding:
+		return
+	encoding = encoding.upper()
+	if encoding in ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE'):
+		return
+	if detector.result['confidence'] < 0.7:
+		return
+	if encoding == 'BIG5':
+		encoding = 'BIG5-HKSCS'
+	elif encoding == 'GB2312':
+		encoding = 'GBK'
+	return encoding
 
 class ConvertToUtf8Command(sublime_plugin.TextCommand):
 	def run(self, edit):
@@ -104,6 +116,12 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			view.settings().erase('check_times')
 		return False
 
+	def clean_vars(self, view):
+		view.settings().erase('origin_encoding')
+		view.erase_status('origin_encoding')
+		view.erase_status('decode_fail_line')
+		view.set_scratch(False)
+
 	def on_clone(self, view):
 		clone_numbers = view.settings().get('clone_numbers', 0)
 		view.settings().set('clone_numbers', clone_numbers + 1)
@@ -127,19 +145,9 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		load_setting = sublime.load_settings('ConvertToUTF8.sublime-settings').get('convert_on_load', 'always')
 		if load_setting == 'never':
 			return
-		result = detect(view.file_name())
-		encoding = result['encoding']
+		encoding = detect(view.file_name())
 		if not encoding:
 			return
-		encoding = encoding.upper()
-		confidence = result['confidence']
-		if confidence < 0.7 or encoding in ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE'):
-			return
-		# It's more compatible to use HKSCS instead of Big5
-		if encoding == 'BIG5':
-			encoding = 'BIG5-HKSCS'
-		elif encoding == 'GB2312':
-			encoding = 'GBK'
 		view.settings().set('origin_encoding', encoding)
 		view.settings().set('prevent_undo', True)
 		view.set_status('origin_encoding', encoding)
@@ -164,6 +172,18 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 				reverted = True
 			elif view.settings().get('reverting'):
 				view.settings().erase('reverting')
+				if view.settings().get('prevent_detect'):
+					view.settings().erase('prevent_detect')
+				else:
+					encoding = detect(view.file_name())
+					if encoding:
+						if encoding != view.settings().get('origin_encoding'):
+							view.settings().set('origin_encoding', encoding)
+							view.set_status('origin_encoding', encoding)
+					else:
+						sublime.error_message('The encoding of this file has been changed outside, which is not supported by ConvertToUTF8. Please close and open this file again if the content is mess up.')
+						self.clean_vars(view)
+						return
 				view.settings().set('prevent_undo', True)
 				reverted = True
 			else:
@@ -189,5 +209,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		settings = sublime.load_settings('ConvertToUTF8.sublime-settings')
 		save_setting = settings.get('convert_on_save', 'always')
 		if save_setting == 'never':
+			self.clean_vars(view)
 			return
+		view.settings().set('prevent_detect', True)
 		self.convert_from_utf8(view)
