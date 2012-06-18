@@ -94,6 +94,16 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 	def convert_from_utf8(self, view):
 		view.run_command('convert_from_utf8')
 
+	def check_clones(self, view):
+		clone_numbers = view.settings().get('clone_numbers', 0)
+		if clone_numbers:
+			check_times = view.settings().get('check_times', clone_numbers)
+			if check_times:
+				view.settings().set('check_times', check_times - 1)
+				return True
+			view.settings().erase('check_times')
+		return False
+
 	def on_clone(self, view):
 		clone_numbers = view.settings().get('clone_numbers', 0)
 		view.settings().set('clone_numbers', clone_numbers + 1)
@@ -107,13 +117,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		file_name = view.file_name()
 		if not file_name:
 			return
-		clone_numbers = view.settings().get('clone_numbers', 0)
-		if clone_numbers:
-			load_times = view.settings().get('load_times', clone_numbers - 1)
-			if load_times:
-				view.settings().set('load_times', load_times - 1)
-				return
-			view.settings().erase('load_times')
+		if self.check_clones(view):
+			return
 		encoding = view.settings().get('origin_encoding')
 		if encoding:
 			view.settings().erase('prevent_undo')
@@ -143,13 +148,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			return
 		if not view.settings().get('origin_encoding'):
 			return
-		clone_numbers = view.settings().get('clone_numbers', 0)
-		if clone_numbers:
-			modified_times = view.settings().get('modified_times', clone_numbers)
-			if modified_times:
-				view.settings().set('modified_times', modified_times - 1)
-				return
-			view.settings().erase('modified_times')
+		if self.check_clones(view):
+			return
 		if view.settings().get('scratch_flag'):
 			view.set_scratch(True)
 			view.settings().erase('scratch_flag')
@@ -162,6 +162,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 				reverted = True
 			elif view.settings().get('reverting'):
 				view.settings().erase('reverting')
+				view.settings().set('prevent_undo', True)
 				reverted = True
 			else:
 				# revert will call on_modified twice
@@ -180,6 +181,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 
 	def on_post_save(self, view):
 		if not view.settings().get('origin_encoding'):
+			return
+		if self.check_clones(view):
 			return
 		settings = sublime.load_settings('ConvertToUTF8.sublime-settings')
 		save_setting = settings.get('convert_on_save', 'always')
