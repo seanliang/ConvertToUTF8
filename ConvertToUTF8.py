@@ -197,10 +197,15 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			else:
 				# revert will call on_modified twice
 				view.settings().set('reverting', True)
+				vp = view.viewport_position()
+				view.settings().set('vp', [vp[0], vp[1]])
 				return
 		if reverted:
 			if view.settings().get('prevent_undo'):
 				self.convert_to_utf8(view)
+				vp = view.settings().get('vp')
+				if vp:
+					view.set_viewport_position(tuple(vp))
 		else:
 			view.set_scratch(False)
 
