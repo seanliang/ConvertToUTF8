@@ -8,13 +8,17 @@ from chardet.universaldetector import UniversalDetector
 import codecs
 
 def detect(file_name):
+	if not os.path.exists(file_name):
+		return
 	detector = UniversalDetector()
 	cnt = 0
-	for line in file(file_name):
+	fp = file(file_name, 'rb')
+	for line in fp:
 		detector.feed(line)
 		cnt += 1
 		if detector.done or cnt > 200:
 			break
+	fp.close()
 	detector.close()
 	encoding = detector.result['encoding']
 	if not encoding:
@@ -36,14 +40,17 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		encoding = view.settings().get('origin_encoding')
 		if not encoding:
 			return
+		view.erase_status('decode_fail_line')
 		file_name = view.file_name()
 		# try fast decode
 		try:
-			contents = codecs.open(file_name, 'r', encoding, errors='strict').read()
+			fp = codecs.open(file_name, 'rb', encoding, errors='strict')
+			contents = fp.read()
+			fp.close()
 		except UnicodeDecodeError, e:
 			# try decode line by line
 			contents = ''
-			fp = file(file_name, 'r')
+			fp = file(file_name, 'rb')
 			fails = []
 			cnt = 0
 			for line in fp:
@@ -55,8 +62,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 					fails.append(cnt)
 			fp.close()
 			view.set_status('decode_fail_line', 'Decode Failed: %r' % fails)
-		if view.line_endings() == 'Windows':
-			contents = contents.replace('\r\n', '\n').replace('\r', '\n')
+		contents = contents.replace('\r\n', '\n').replace('\r', '\n')
 		regions = sublime.Region(0, view.size())
 		edit = view.begin_edit()
 		view.replace(edit, regions, contents)
@@ -77,9 +83,11 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 			return
 		file_name = view.file_name()
 		try:
-			contents = codecs.EncodedFile(file(file_name, 'r'), encoding, 'UTF-8').read()
+			fp = file(file_name, 'rb')
+			contents = codecs.EncodedFile(fp, encoding, 'UTF-8').read()
+			fp.close()
 		except UnicodeEncodeError, e:
-			fp = file(file_name, 'r')
+			fp = file(file_name, 'rb')
 			contents = ''
 			for line in fp:
 				try:
@@ -87,7 +95,7 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 				except UnicodeEncodeError, e:
 					contents += line.decode('UTF-8').encode('ISO-8859-1')
 			fp.close()
-		fp = file(view.file_name(), 'w')
+		fp = file(view.file_name(), 'wb')
 		fp.write(contents)
 		fp.close()
 		sublime.status_message('UTF8 -> %s' % encoding)
