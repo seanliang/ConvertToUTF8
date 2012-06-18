@@ -138,6 +138,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		# It's more compatible to use HKSCS instead of Big5
 		if encoding == 'BIG5':
 			encoding = 'BIG5-HKSCS'
+		elif encoding == 'GB2312':
+			encoding = 'GBK'
 		view.settings().set('origin_encoding', encoding)
 		view.settings().set('prevent_undo', True)
 		view.set_status('origin_encoding', encoding)
