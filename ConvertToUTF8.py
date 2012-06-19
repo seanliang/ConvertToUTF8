@@ -25,6 +25,11 @@ def detect(file_name):
 		return
 	if detector.result['confidence'] < 0.7:
 		return
+	encoding = encoding.upper()
+	if encoding == 'BIG5':
+		encoding = 'BIG5-HKSCS'
+	elif encoding == 'GB2312':
+		encoding = 'GBK'
 	return encoding
 
 def show_encoding_status(view):
@@ -34,11 +39,6 @@ def show_encoding_status(view):
 	view.set_status('origin_encoding', encoding)
 
 def init_encoding_vars(view, encoding):
-	encoding = encoding.upper()
-	if encoding == 'BIG5':
-		encoding = 'BIG5-HKSCS'
-	elif encoding == 'GB2312':
-		encoding = 'GBK'
 	view.settings().set('origin_encoding', encoding)
 	show_encoding_status(view)
 	if encoding in ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE'):
@@ -210,8 +210,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 					encoding = detect(view.file_name())
 					if encoding:
 						if encoding != view.settings().get('origin_encoding'):
-							view.settings().set('origin_encoding', encoding)
-							view.set_status('origin_encoding', encoding)
+							init_encoding_vars(view, encoding)
 					else:
 						sublime.error_message('The encoding of this file has been changed outside, which is not supported by ConvertToUTF8. Please set the encoding if the content is mess up.')
 						clean_encoding_vars(view)
