@@ -1,6 +1,6 @@
 Description (中文说明见README.zh_CN.md)
 ------------------
-This Sublime Text 2 plug-in aims to help people view and edit text files which encodings are not supported currently by Sublime Text, especially for CJK users who using GB2312, GBK, BIG5, etc.
+This Sublime Text 2 plug-in aims to help people view and edit text files which encodings are not supported currently by Sublime Text, especially for CJK users who using GB2312, GBK, BIG5, EUC-KR, EUC-JP, etc.
 
 It will:
 * finds the proper encoding of current file when a file is loaded
@@ -18,6 +18,17 @@ Configuration
 Please check [Configuration file](ConvertToUTF8.sublime-settings) for details.
 * convert_on_load: if set to never, the file will not be decoded when opening
 * convert_on_save: if set to never, the file will be encoded as UTF-8 when saving
+
+Usage
+------------------
+The plug-in will detect the encoding of opening files, then convert them to UTF-8 for viewing and editing, and convert them back to original encoding when saving.
+
+ConvertToUTF8 creates an entry "Set File Encoding to" under "File" menu. You can use it to translate between different encodings. For example, you can open a UTF-8 file, and save it to GBK, and vice versa.
+
+Please note:
+* if "convert_on_load" is set to never, ConvertToUTF8 will decode the file using selected encoding
+* if "convert_on_save" is set to never, the file will *NEVER* be saved to selected encoding
+
 
 Q & A
 ------------------

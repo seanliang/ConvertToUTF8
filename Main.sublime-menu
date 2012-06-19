@@ -1,0 +1,20 @@
+[
+	{
+		"id": "file",
+		"children":
+		[
+			{
+				"caption": "Set File Encoding to",
+				"children":
+				[
+					{ "caption": "Chinese Simplified (GBK)", "command": "convert_to_utf8", "args": {"encoding": "GBK" } },
+					{ "caption": "Chinese Traditional (BIG5)", "command": "convert_to_utf8", "args": {"encoding": "BIG5" } },
+					{ "caption": "Korean (EUC-KR)", "command": "convert_to_utf8", "args": {"encoding": "EUC-KR" } },
+					{ "caption": "Japanese (EUC-JP)", "command": "convert_to_utf8", "args": {"encoding": "EUC-JP" } },
+					{ "caption": "-" },
+					{ "caption": "UTF-8", "command": "convert_to_utf8", "args": {"encoding": "UTF-8" } }
+				]
+			}
+		]
+	}
+]
