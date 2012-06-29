@@ -16,8 +16,9 @@ Otherwise, you can download this repository as a zip file, unzip it, and rename 
 Configuration
 ------------------
 Please check [Configuration file](ConvertToUTF8.sublime-settings) for details.
-* convert_on_load: if set to never, the file will not be decoded when opening
-* convert_on_save: if set to never, the file will be encoded as UTF-8 when saving
+* max_detect_lines: maxmium lines to detect, 0 means unlimited (default: 600)
+* convert_on_load: if set to never, the file will not be decoded when opening (default: always)
+* convert_on_save: if set to never, the file will be encoded as UTF-8 when saving (default: always)
 
 Usage
 ------------------
@@ -25,9 +26,11 @@ The plug-in will detect the encoding of opening files, then convert them to UTF-
 
 ConvertToUTF8 creates an entry "Set File Encoding to" under "File" menu. You can use it to translate between different encodings. For example, you can open a UTF-8 file, and save it to GBK, and vice versa.
 
-Please note:
+Note:
 * if "convert_on_load" is set to never, ConvertToUTF8 will decode the file using selected encoding
 * if "convert_on_save" is set to never, the file will *NEVER* be saved to selected encoding
+* please do not edit the file before the encoding detection process is finished
+* please try either increasing the value of max_detect_lines or set the encoding manually if the detection result is not accurate
 
 
 Q & A
@@ -39,10 +42,6 @@ Q & A
 * Q: Why does the content become a mess when the window is re-activated?
 
   A: This is caused by reloading and has been fixed, please update your *ConvertToUTF8* to latest version.
-
-* Q: What does "Decode Failed: [123, 456]" in status bar mean?
-
-  A: It means the line numbers which can't be decode correctly, those lines will be decoded to ISO-8859-1.
 
 * Q: When saving the file, Sublime Text tells me the file is saved as UTF-8, why?
 
