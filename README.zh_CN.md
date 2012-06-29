@@ -16,8 +16,9 @@ Sublime Text 2 目前不支持双字节编码，包括 CJK 用户经常使用的
 设置
 ------------------
 请查看[设置文件](ConvertToUTF8.sublime-settings)获取详细信息。
-* convert_on_load：如设置为 never，打开文件时将不进行解码
-* convert_on_save：如设置为 never，文件保存时将转换成 UTF-8 编码
+* max_detect_lines：最大检测行数，0 表示不限制（默认为 600）
+* convert_on_load：如设置为 never，打开文件时将不进行解码（默认为 always）
+* convert_on_save：如设置为 never，文件保存时将转换成 UTF-8 编码（默认为 always）
 
 使用说明
 ------------------
@@ -25,9 +26,11 @@ Sublime Text 2 目前不支持双字节编码，包括 CJK 用户经常使用的
 
 ConvertToUTF8 在 File（文件）菜单下建立了一个子菜单 Set File Encoding to。用户可通过该菜单对文件编码进行手工转换。例如，你可以打开一个 UTF-8 编码的文件，指定保存为 GBK，反之亦然。
 
-请注意：
+注意：
 * 如果 convert_on_load 被设置为 never，ConvertToUTF8 将使用指定的编码对文件进行解码
 * 如果 convert_on_save 被设置为 never，文件不会被保存成指定编码
+* 在文件编码检测过程完成前请勿编辑文件
+* 若检测结果不准确，请尝试增大 max_detect_lines 的值或手工指定编码
 
 
 常见问题
@@ -39,10 +42,6 @@ ConvertToUTF8 在 File（文件）菜单下建立了一个子菜单 Set File Enc
 * 问：为何有时重新激活窗口，里面的内容会变乱码？
 
   答：此问题是由重新载入引起的，且已修复，请更新 *ConvertToUTF8* 插件到最新版本。
-
-* 问：状态栏中出现 Decode Failed: [123, 456]，这是什么意思？
-
-  答：括号中的数值表示此文件无法被正常解码的行号，为避免文件信息丢失，这几行将被解码为 ISO-8859-1。
 
 * 问：在保存文件时，Sublime Text 为什么提示将文件保存为 UTF-8？
 
