@@ -16,6 +16,7 @@ Sublime Text 2 目前不支持双字节编码，包括 CJK 用户经常使用的
 设置
 ------------------
 请查看[设置文件](ConvertToUTF8.sublime-settings)获取详细信息。
+* max_cache_size：最大编码缓存数量，0 表示不缓存（默认为 100）
 * max_detect_lines：最大检测行数，0 表示不限制（默认为 600）
 * convert_on_load：如设置为 never，打开文件时将不进行解码（默认为 always）
 * convert_on_save：如设置为 never，文件保存时将转换成 UTF-8 编码（默认为 always）
