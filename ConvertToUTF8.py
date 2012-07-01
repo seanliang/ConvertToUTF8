@@ -7,13 +7,71 @@ import os
 from chardet.universaldetector import UniversalDetector
 import codecs
 import threading
+import json
 
 SKIP_ENCODINGS = ('Hexadecimal', 'ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE')
 
 SETTINGS = {}
 
+class EncodingCache(object):
+	def __init__(self):
+		self.cache_file = os.path.join(os.getcwd(), 'encoding_cache.json')
+		self.encoding_cache = []
+		self.max_size = -1
+		self.dirty = False
+		self.load()
+		self.save_on_dirty()
+
+	def save_on_dirty(self):
+		if self.dirty:
+			self.save()
+		sublime.set_timeout(self.save_on_dirty, 10000)
+
+	def shrink(self):
+		if self.max_size < 0:
+			return
+		if len(self.encoding_cache) > self.max_size:
+			self.dirty = True
+			del self.encoding_cache[self.max_size:]
+
+	def set_max_size(self, max_size):
+		self.max_size = max_size
+		self.shrink()
+
+	def load(self):
+		if not os.path.exists(self.cache_file):
+			return
+		fp = file(self.cache_file, 'rb')
+		self.encoding_cache = json.load(fp)
+		fp.close()
+
+	def save(self):
+		self.shrink()
+		fp = file(self.cache_file, 'wb')
+		json.dump(self.encoding_cache, fp)
+		fp.close()
+		self.dirty = False
+
+	def pop(self, file_name):
+		for item in self.encoding_cache:
+			if item['file'] == file_name:
+				self.encoding_cache.remove(item)
+				self.dirty = True
+				return item['encoding']
+		return None
+
+	def set(self, file_name, encoding):
+		self.encoding_cache.insert(0, {
+			'file': file_name,
+			'encoding': encoding
+		})
+		self.dirty = True
+
+encoding_cache = EncodingCache()
+
 def get_settings():
 	settings = sublime.load_settings('ConvertToUTF8.sublime-settings')
+	encoding_cache.set_max_size(settings.get('max_cache_size', 100))
 	SETTINGS['max_detect_lines'] = settings.get('max_detect_lines', 600)
 	SETTINGS['convert_on_load'] = settings.get('convert_on_load', 'always')
 	SETTINGS['convert_on_save'] = settings.get('convert_on_save', 'always')
@@ -24,8 +82,12 @@ def init_settings():
 
 init_settings()
 
-def detect(view, file_name, callback=None):
+def detect(view, file_name):
 	if not os.path.exists(file_name):
+		return
+	encoding = encoding_cache.pop(file_name)
+	if encoding:
+		sublime.set_timeout(lambda: init_encoding_vars(view, encoding, detect_on_fail=True), 0)
 		return
 	sublime.set_timeout(lambda: view.set_status('origin_encoding', 'Detecting encoding, please wait...'), 0)
 	detector = UniversalDetector()
@@ -48,9 +110,7 @@ def detect(view, file_name, callback=None):
 		encoding = 'BIG5-HKSCS'
 	elif encoding == 'GB2312':
 		encoding = 'GBK'
-	if callback:
-		sublime.set_timeout(lambda: callback(view, encoding), 0)
-	return encoding
+	sublime.set_timeout(lambda: init_encoding_vars(view, encoding), 0)
 
 def show_encoding_status(view):
 	encoding = view.settings().get('force_encoding')
@@ -58,7 +118,7 @@ def show_encoding_status(view):
 		encoding = view.settings().get('origin_encoding')
 	view.set_status('origin_encoding', encoding)
 
-def init_encoding_vars(view, encoding, run_convert=True):
+def init_encoding_vars(view, encoding, run_convert=True, detect_on_fail=False):
 	if not encoding:
 		return
 	view.settings().set('origin_encoding', encoding)
@@ -70,7 +130,7 @@ def init_encoding_vars(view, encoding, run_convert=True):
 		return
 	view.settings().set('prevent_undo', True)
 	if run_convert:
-		view.run_command('convert_to_utf8')
+		view.run_command('convert_to_utf8', {'detect_on_fail': detect_on_fail})
 
 def clean_encoding_vars(view):
 	view.settings().erase('in_converting')
@@ -79,7 +139,7 @@ def clean_encoding_vars(view):
 	view.set_scratch(False)
 
 class ConvertToUtf8Command(sublime_plugin.TextCommand):
-	def run(self, edit, encoding=None):
+	def run(self, edit, encoding=None, detect_on_fail=False):
 		view = self.view
 		if encoding:
 			view.settings().set('force_encoding', encoding)
@@ -105,10 +165,14 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 			contents = fp.read()
 		except UnicodeDecodeError, e:
 			clean_encoding_vars(view)
+			if detect_on_fail:
+				detect(view, file_name)
+				return
 			sublime.error_message('Can not convert file %s with %s, please try another encoding.' % (file_name, encoding))
 			return
 		finally:
 			fp.close()
+		encoding_cache.set(file_name, encoding)
 		contents = contents.replace('\r\n', '\n').replace('\r', '\n')
 		regions = sublime.Region(0, view.size())
 		sel = view.sel()
@@ -137,9 +201,10 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		encoding = view.settings().get('force_encoding')
 		if not encoding:
 			encoding = view.settings().get('origin_encoding')
-		if not encoding or encoding == 'UTF-8':
-			return
 		file_name = view.file_name()
+		if not encoding or encoding == 'UTF-8':
+			encoding_cache.pop(file_name)
+			return
 		try:
 			fp = file(file_name, 'rb')
 			contents = codecs.EncodedFile(fp, encoding, 'UTF-8').read()
@@ -151,6 +216,7 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		fp = file(file_name, 'wb')
 		fp.write(contents)
 		fp.close()
+		encoding_cache.set(file_name, encoding)
 		view.settings().set('prevent_detect', True)
 		sublime.status_message('UTF8 -> %s' % encoding)
 
@@ -202,7 +268,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		view_encoding = view.encoding()
 		if view_encoding != 'Undefined' and view_encoding != sublime.load_settings('Preferences.sublime-settings').get('fallback_encoding'):
 			return
-		threading.Thread(target=lambda: detect(view, file_name, init_encoding_vars)).start()
+		threading.Thread(target=lambda: detect(view, file_name)).start()
 
 	def on_modified(self, view):
 		file_name = view.file_name()
@@ -232,7 +298,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 					view_encoding = view.encoding()
 					if view_encoding != 'Undefined' and view_encoding != sublime.load_settings('Preferences.sublime-settings').get('fallback_encoding'):
 						return
-					threading.Thread(target=lambda: detect(view, file_name, init_encoding_vars)).start()
+					threading.Thread(target=lambda: detect(view, file_name)).start()
 					return
 				view.settings().set('prevent_undo', True)
 				reverted = True
