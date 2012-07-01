@@ -3,7 +3,6 @@
 import sublime, sublime_plugin
 import sys
 import os
-# sys.path.append(os.path.join(sublime.packages_path(), 'ConvertToUTF8', 'chardet'))
 from chardet.universaldetector import UniversalDetector
 import codecs
 import threading
@@ -15,7 +14,7 @@ SETTINGS = {}
 
 class EncodingCache(object):
 	def __init__(self):
-		self.cache_file = os.path.join(os.getcwd(), 'encoding_cache.json')
+		self.cache_file = os.path.join(sublime.packages_path(), 'User','encoding_cache.json')
 		self.encoding_cache = []
 		self.max_size = -1
 		self.dirty = False
