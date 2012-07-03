@@ -14,7 +14,7 @@ SETTINGS = {}
 
 class EncodingCache(object):
 	def __init__(self):
-		self.cache_file = os.path.join(sublime.packages_path(), 'User','encoding_cache.json')
+		self.cache_file = os.path.join(sublime.packages_path(), 'User', 'encoding_cache.json')
 		self.encoding_cache = []
 		self.max_size = -1
 		self.dirty = False
@@ -60,6 +60,9 @@ class EncodingCache(object):
 		return None
 
 	def set(self, file_name, encoding):
+		if self.max_size < 1:
+			return
+		self.pop(file_name)
 		self.encoding_cache.insert(0, {
 			'file': file_name,
 			'encoding': encoding
@@ -123,6 +126,7 @@ def init_encoding_vars(view, encoding, run_convert=True, detect_on_fail=False):
 	view.settings().set('origin_encoding', encoding)
 	show_encoding_status(view)
 	if encoding in SKIP_ENCODINGS or encoding == view.encoding():
+		encoding_cache.pop(view.file_name())
 		return
 	view.settings().set('in_converting', True)
 	if view.encoding() in SKIP_ENCODINGS:
@@ -317,6 +321,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			view.set_encoding(force_encoding)
 			return
 		if not view.settings().get('in_converting'):
+			return
+		if self.check_clones(view):
 			return
 		view.set_encoding('UTF-8')
 
