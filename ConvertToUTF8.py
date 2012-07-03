@@ -7,6 +7,7 @@ from chardet.universaldetector import UniversalDetector
 import codecs
 import threading
 import json
+import time
 
 SKIP_ENCODINGS = ('Hexadecimal', 'ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE')
 
@@ -14,7 +15,7 @@ SETTINGS = {}
 
 class EncodingCache(object):
 	def __init__(self):
-		self.cache_file = os.path.join(sublime.packages_path(), 'User','encoding_cache.json')
+		self.cache_file = os.path.join(sublime.packages_path(), 'User', 'encoding_cache.json')
 		self.encoding_cache = []
 		self.max_size = -1
 		self.dirty = False
@@ -60,6 +61,9 @@ class EncodingCache(object):
 		return None
 
 	def set(self, file_name, encoding):
+		if self.max_size < 1:
+			return
+		self.pop(file_name)
 		self.encoding_cache.insert(0, {
 			'file': file_name,
 			'encoding': encoding
@@ -117,19 +121,22 @@ def show_encoding_status(view):
 		encoding = view.settings().get('origin_encoding')
 	view.set_status('origin_encoding', encoding)
 
-def init_encoding_vars(view, encoding, run_convert=True, detect_on_fail=False):
+def init_encoding_vars(view, encoding, run_convert=True, stamp=None, detect_on_fail=False):
+	view.settings().erase('in_reverting')
 	if not encoding:
 		return
 	view.settings().set('origin_encoding', encoding)
 	show_encoding_status(view)
 	if encoding in SKIP_ENCODINGS or encoding == view.encoding():
+		encoding_cache.pop(view.file_name())
 		return
 	view.settings().set('in_converting', True)
 	if view.encoding() in SKIP_ENCODINGS:
 		return
-	view.settings().set('prevent_undo', True)
 	if run_convert:
-		view.run_command('convert_to_utf8', {'detect_on_fail': detect_on_fail})
+		if stamp == None:
+			stamp = '%r' % time.time()
+		view.run_command('convert_to_utf8', {'detect_on_fail': detect_on_fail, 'stamp': stamp})
 
 def clean_encoding_vars(view):
 	view.settings().erase('in_converting')
@@ -137,8 +144,10 @@ def clean_encoding_vars(view):
 	view.erase_status('origin_encoding')
 	view.set_scratch(False)
 
+stamps = {}
+
 class ConvertToUtf8Command(sublime_plugin.TextCommand):
-	def run(self, edit, encoding=None, detect_on_fail=False):
+	def run(self, edit, encoding=None, stamp=None, detect_on_fail=False):
 		view = self.view
 		if encoding:
 			view.settings().set('force_encoding', encoding)
@@ -149,7 +158,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 					return
 				view.set_scratch(False)
 				run_convert = False
-			init_encoding_vars(view, encoding, run_convert)
+			init_encoding_vars(view, encoding, run_convert, stamp)
 			return
 		else:
 			encoding = view.settings().get('origin_encoding')
@@ -185,7 +194,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		for x in rs:
 			sel.add(sublime.Region(x.a, x.b))
 		view.set_viewport_position(vp)
-		view.settings().set('scratch_flag', True)
+		stamps[file_name] = stamp
 		sublime.status_message('%s -> UTF8' % encoding)
 
 	def description(self):
@@ -226,12 +235,6 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		return 'UTF8 -> %s' % encoding
 
 class ConvertToUTF8Listener(sublime_plugin.EventListener):
-	def convert_to_utf8(self, view):
-		view.run_command('convert_to_utf8')
-
-	def convert_from_utf8(self, view):
-		view.run_command('convert_from_utf8')
-
 	def check_clones(self, view):
 		clone_numbers = view.settings().get('clone_numbers', 0)
 		if clone_numbers:
@@ -259,7 +262,6 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			return
 		encoding = view.settings().get('origin_encoding')
 		if encoding:
-			view.settings().erase('prevent_undo')
 			view.set_status('origin_encoding', encoding)
 			return
 		if SETTINGS['convert_on_load'] == 'never':
@@ -277,37 +279,31 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			return
 		if self.check_clones(view):
 			return
-		if view.settings().get('scratch_flag'):
-			view.set_scratch(True)
-			view.settings().erase('scratch_flag')
-			return
-		# reach origin content
 		command = view.command_history(0)
-		reverted = (command == (None, None, 0))
-		if command[0] == 'revert':
-			if not hasattr(self, 'in_reverting'):
-				self.in_reverting = False
-			if view.command_history(1)[0] == 'convert_to_utf8':
-				reverted = True
-			elif self.in_reverting:
-				self.in_reverting = False
+		command1 = view.command_history(1)
+		if command == (None, None, 0):
+			if command1[0] == 'convert_to_utf8':
+				view.run_command('redo')
+		elif command[0] == 'convert_to_utf8':
+			if stamps.has_key(file_name):
+				if stamps[file_name] == command[1].get('stamp'):
+					view.set_scratch(True)
+		elif command[0] == 'revert':
+			if command1 == (None, None, 0):
 				if view.settings().get('prevent_detect'):
+					if view.is_dirty():
+						return
 					view.settings().erase('prevent_detect')
+					view.run_command('undo')
+					view.set_scratch(True)
 				else:
 					view_encoding = view.encoding()
 					if view_encoding != 'Undefined' and view_encoding != sublime.load_settings('Preferences.sublime-settings').get('fallback_encoding'):
 						return
+					if view.settings().get('in_reverting'):
+						return
+					view.settings().set('in_reverting', True)
 					threading.Thread(target=lambda: detect(view, file_name)).start()
-					return
-				view.settings().set('prevent_undo', True)
-				reverted = True
-			else:
-				# revert will call on_modified twice
-				self.in_reverting = True
-				return
-		if reverted:
-			if view.settings().get('prevent_undo'):
-				self.convert_to_utf8(view)
 		else:
 			view.set_scratch(False)
 
@@ -318,6 +314,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			return
 		if not view.settings().get('in_converting'):
 			return
+		if self.check_clones(view):
+			return
 		view.set_encoding('UTF-8')
 
 	def on_post_save(self, view):
@@ -325,7 +323,10 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			return
 		if self.check_clones(view):
 			return
+		file_name = view.file_name()
+		if stamps.has_key(file_name):
+			del stamps[file_name]
 		if SETTINGS['convert_on_save'] == 'never':
 			clean_encoding_vars(view)
 			return
-		self.convert_from_utf8(view)
+		view.run_command('convert_from_utf8')
