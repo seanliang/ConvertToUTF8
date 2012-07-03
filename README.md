@@ -44,6 +44,10 @@ Q & A
 
   A: This is caused by reloading and has been fixed, please update your *ConvertToUTF8* to latest version.
 
+* Q: Why does ST2 ask me that file "Has changed on disk. Do you want to reload it?" when the window is re-activated.
+
+  A: Same reason as above. Please choose "Cancel" if you have unsaved changes to the file.
+
 * Q: When saving the file, Sublime Text tells me the file is saved as UTF-8, why?
 
   A: Don't worry, the plug-in will convert your file to original encoding.

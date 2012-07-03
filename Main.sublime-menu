@@ -7,13 +7,13 @@
 				"caption": "Set File Encoding to",
 				"children":
 				[
-					{ "caption": "Chinese Simplified (GBK)", "command": "convert_to_utf8", "args": {"encoding": "GBK" } },
-					{ "caption": "Chinese Traditional (BIG5)", "command": "convert_to_utf8", "args": {"encoding": "BIG5-HKSCS" } },
-					{ "caption": "Korean (EUC-KR)", "command": "convert_to_utf8", "args": {"encoding": "EUC-KR" } },
-					{ "caption": "Japanese (Shift_JIS)", "command": "convert_to_utf8", "args": {"encoding": "Shift_JIS" } },
-					{ "caption": "Japanese (EUC-JP)", "command": "convert_to_utf8", "args": {"encoding": "EUC-JP" } },
+					{ "caption": "Chinese Simplified (GBK)", "command": "convert_to_utf8", "args": {"encoding": "GBK", "stamp": "0" } },
+					{ "caption": "Chinese Traditional (BIG5)", "command": "convert_to_utf8", "args": {"encoding": "BIG5-HKSCS", "stamp": "0" } },
+					{ "caption": "Korean (EUC-KR)", "command": "convert_to_utf8", "args": {"encoding": "EUC-KR", "stamp": "0" } },
+					{ "caption": "Japanese (Shift_JIS)", "command": "convert_to_utf8", "args": {"encoding": "Shift_JIS", "stamp": "0" } },
+					{ "caption": "Japanese (EUC-JP)", "command": "convert_to_utf8", "args": {"encoding": "EUC-JP", "stamp": "0" } },
 					{ "caption": "-" },
-					{ "caption": "UTF-8", "command": "convert_to_utf8", "args": {"encoding": "UTF-8" } }
+					{ "caption": "UTF-8", "command": "convert_to_utf8", "args": {"encoding": "UTF-8", "stamp": "0" } }
 				]
 			}
 		]
