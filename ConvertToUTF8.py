@@ -131,8 +131,6 @@ def init_encoding_vars(view, encoding, run_convert=True, stamp=None, detect_on_f
 		encoding_cache.pop(view.file_name())
 		return
 	view.settings().set('in_converting', True)
-	if view.encoding() in SKIP_ENCODINGS:
-		return
 	if run_convert:
 		if stamp == None:
 			stamp = '%r' % time.time()
@@ -266,9 +264,6 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			return
 		if SETTINGS['convert_on_load'] == 'never':
 			return
-		view_encoding = view.encoding()
-		if view_encoding != 'Undefined' and view_encoding != sublime.load_settings('Preferences.sublime-settings').get('fallback_encoding'):
-			return
 		threading.Thread(target=lambda: detect(view, file_name)).start()
 
 	def on_modified(self, view):
@@ -295,17 +290,20 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 						return
 					view.settings().erase('prevent_detect')
 					view.run_command('undo')
-					view.set_scratch(True)
+					if view.settings().get('revert_to_scratch'):
+						view.set_scratch(True)
 				else:
-					view_encoding = view.encoding()
-					if view_encoding != 'Undefined' and view_encoding != sublime.load_settings('Preferences.sublime-settings').get('fallback_encoding'):
-						return
 					if view.settings().get('in_reverting'):
 						return
 					view.settings().set('in_reverting', True)
 					threading.Thread(target=lambda: detect(view, file_name)).start()
 		else:
 			view.set_scratch(False)
+
+	def on_deactivated(self, view):
+		if view.settings().get('prevent_detect'):
+			view.settings().set('revert_to_scratch', not view.is_dirty())
+			view.run_command('revert')
 
 	def on_pre_save(self, view):
 		force_encoding = view.settings().get('force_encoding')
