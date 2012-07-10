@@ -134,7 +134,10 @@ def init_encoding_vars(view, encoding, run_convert=True, stamp=None, detect_on_f
 	if run_convert:
 		if stamp == None:
 			stamp = '%r' % time.time()
+		translate_tabs_to_spaces = view.settings().get('translate_tabs_to_spaces')
+		view.settings().set('translate_tabs_to_spaces', False)
 		view.run_command('convert_to_utf8', {'detect_on_fail': detect_on_fail, 'stamp': stamp})
+		view.settings().set('translate_tabs_to_spaces', translate_tabs_to_spaces)
 
 def clean_encoding_vars(view):
 	view.settings().erase('in_converting')
