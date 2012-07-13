@@ -122,7 +122,6 @@ def show_encoding_status(view):
 	view.set_status('origin_encoding', encoding)
 
 def init_encoding_vars(view, encoding, run_convert=True, stamp=None, detect_on_fail=False):
-	view.settings().erase('in_reverting')
 	if not encoding:
 		return
 	view.settings().set('origin_encoding', encoding)
@@ -264,7 +263,17 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		encoding = view.settings().get('origin_encoding')
 		if encoding:
 			view.set_status('origin_encoding', encoding)
-			return
+			# file is reloading
+			if view.settings().get('prevent_detect'):
+				if view.is_dirty():
+					# changes have not been saved
+					sublime.set_timeout(lambda: self.on_deactivated(view), 0)
+					return
+				else:
+					# treat as a new file
+					view.settings().erase('prevent_detect')
+			else:
+				return
 		if SETTINGS['convert_on_load'] == 'never':
 			return
 		threading.Thread(target=lambda: detect(view, file_name)).start()
@@ -291,17 +300,17 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 				if view.settings().get('prevent_detect'):
 					if view.is_dirty():
 						return
-					view.settings().erase('prevent_detect')
-					view.run_command('undo')
-					if view.settings().get('revert_to_scratch'):
-						view.set_scratch(True)
+					sublime.set_timeout(lambda: self.undo_me(view), 0)
 				else:
-					if view.settings().get('in_reverting'):
-						return
-					view.settings().set('in_reverting', True)
 					threading.Thread(target=lambda: detect(view, file_name)).start()
 		else:
 			view.set_scratch(False)
+
+	def undo_me(self, view):
+		view.settings().erase('prevent_detect')
+		view.run_command('undo')
+		if view.settings().get('revert_to_scratch'):
+			view.set_scratch(True)
 
 	def on_deactivated(self, view):
 		if view.settings().get('prevent_detect'):
