@@ -9,7 +9,7 @@ import threading
 import json
 import time
 
-SKIP_ENCODINGS = ('Hexadecimal', 'ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE')
+SKIP_ENCODINGS = ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE')
 
 SETTINGS = {}
 
@@ -105,15 +105,25 @@ def detect(view, file_name):
 	detector.close()
 	encoding = detector.result['encoding']
 	confidence = detector.result['confidence']
-	if not encoding or confidence < 0.7:
-		sublime.set_timeout(lambda: view.set_status('origin_encoding', 'Encoding can not be detected, please choose one manually. (%s/%.2f)' % (encoding, confidence)), 0)
-		return
-	encoding = encoding.upper()
+	sublime.set_timeout(lambda: check_encoding(view, encoding, confidence), 0)
+
+def check_encoding(view, encoding, confidence):
+	if not encoding or confidence < 0.8:
+		view_encoding = view.encoding()
+		if view_encoding == view.settings().get('fallback_encoding'):
+			# show error only when the ST2 can't detect the encoding either
+			view.set_status('origin_encoding', 'Encoding can not be detected, please choose one manually. (%s/%.2f)' % (encoding, confidence))
+			return
+		else:
+			# using encoding detected by ST2
+			encoding = view_encoding
+	else:
+		encoding = encoding.upper()
 	if encoding == 'BIG5':
 		encoding = 'BIG5-HKSCS'
 	elif encoding == 'GB2312':
 		encoding = 'GBK'
-	sublime.set_timeout(lambda: init_encoding_vars(view, encoding), 0)
+	init_encoding_vars(view, encoding)
 
 def show_encoding_status(view):
 	encoding = view.settings().get('force_encoding')
@@ -143,6 +153,7 @@ def clean_encoding_vars(view):
 	view.settings().erase('origin_encoding')
 	view.erase_status('origin_encoding')
 	view.set_scratch(False)
+	encoding_cache.pop(view.file_name())
 
 stamps = {}
 
@@ -152,7 +163,8 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		if encoding:
 			view.settings().set('force_encoding', encoding)
 			origin_encoding = view.settings().get('origin_encoding')
-			run_convert = True
+			# convert only when ST2 can't load file properly
+			run_convert = (view.encoding() == view.settings().get('fallback_encoding'))
 			if origin_encoding:
 				if origin_encoding == encoding:
 					return
@@ -202,6 +214,9 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		if not encoding:
 			return
 		return '%s -> UTF8' % encoding
+
+	def is_enabled(self):
+		return self.view.encoding() != 'Hexadecimal'
 
 class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 	def run(self, edit):
@@ -255,6 +270,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			view.settings().set('clone_numbers', clone_numbers - 1)
 
 	def on_load(self, view):
+		if view.encoding() == 'Hexadecimal':
+			return
 		file_name = view.file_name()
 		if not file_name:
 			return
@@ -279,6 +296,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		threading.Thread(target=lambda: detect(view, file_name)).start()
 
 	def on_modified(self, view):
+		if view.encoding() == 'Hexadecimal':
+			return
 		file_name = view.file_name()
 		if not file_name or view.is_loading():
 			return
@@ -318,6 +337,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			view.run_command('revert')
 
 	def on_pre_save(self, view):
+		if view.encoding() == 'Hexadecimal':
+			return
 		force_encoding = view.settings().get('force_encoding')
 		if force_encoding == 'UTF-8':
 			view.set_encoding(force_encoding)
@@ -329,6 +350,9 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		view.set_encoding('UTF-8')
 
 	def on_post_save(self, view):
+		view_encoding = view.encoding()
+		if view_encoding == 'Hexadecimal':
+			return
 		if not view.settings().get('in_converting'):
 			return
 		if self.check_clones(view):
@@ -337,6 +361,9 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		if stamps.has_key(file_name):
 			del stamps[file_name]
 		if SETTINGS['convert_on_save'] == 'never':
+			return
+		# file was saved with other encoding
+		if view_encoding != 'UTF-8':
 			clean_encoding_vars(view)
 			return
 		view.run_command('convert_from_utf8')
