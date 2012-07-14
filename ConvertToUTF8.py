@@ -12,6 +12,7 @@ import time
 SKIP_ENCODINGS = ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE')
 
 SETTINGS = {}
+REVERTING_FILES = []
 
 class EncodingCache(object):
 	def __init__(self):
@@ -155,6 +156,10 @@ def clean_encoding_vars(view):
 	view.set_scratch(False)
 	encoding_cache.pop(view.file_name())
 
+def remove_reverting(file_name):
+	while file_name in REVERTING_FILES:
+		REVERTING_FILES.remove(file_name)
+
 stamps = {}
 
 class ConvertToUtf8Command(sublime_plugin.TextCommand):
@@ -268,6 +273,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		clone_numbers = view.settings().get('clone_numbers', 0)
 		if clone_numbers:
 			view.settings().set('clone_numbers', clone_numbers - 1)
+		else:
+			remove_reverting(view.file_name())
 
 	def on_load(self, view):
 		if view.encoding() == 'Hexadecimal':
@@ -316,9 +323,12 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 					view.set_scratch(True)
 		elif command[0] == 'revert':
 			if command1 == (None, None, 0):
+				# on_modified will be invoked twice for each revert
+				if file_name not in REVERTING_FILES:
+					REVERTING_FILES.insert(0, file_name)
+					return
+				remove_reverting(file_name)
 				if view.settings().get('prevent_detect'):
-					if view.is_dirty():
-						return
 					sublime.set_timeout(lambda: self.undo_me(view), 0)
 				else:
 					threading.Thread(target=lambda: detect(view, file_name)).start()
@@ -333,6 +343,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 
 	def on_deactivated(self, view):
 		if view.settings().get('prevent_detect'):
+			remove_reverting(view.file_name())
 			view.settings().set('revert_to_scratch', not view.is_dirty())
 			view.run_command('revert')
 
