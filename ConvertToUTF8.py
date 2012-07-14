@@ -191,7 +191,6 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 			fp = codecs.open(file_name, 'rb', encoding, errors='strict')
 			contents = fp.read()
 		except UnicodeDecodeError, e:
-			clean_encoding_vars(view)
 			if detect_on_fail:
 				detect(view, file_name)
 				return
@@ -204,8 +203,10 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 					fp = codecs.open(file_name, 'rb', encoding, errors='replace')
 					contents = fp.read()
 				else:
+					clean_encoding_vars(view)
 					return
 			else:
+				clean_encoding_vars(view)
 				sublime.error_message('Errors occurred while converting %s file with %s encoding.\n\n'
 						'Please choose another encoding manually or upgrade your Sublime Text.' %
 						(os.path.basename(file_name), encoding))
