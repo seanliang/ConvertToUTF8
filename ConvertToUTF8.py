@@ -14,6 +14,8 @@ SKIP_ENCODINGS = ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE')
 SETTINGS = {}
 REVERTING_FILES = []
 
+CONFIRM_IS_AVAILABLE = (sublime.version() > '2186')
+
 class EncodingCache(object):
 	def __init__(self):
 		self.cache_file = os.path.join(sublime.packages_path(), 'User', 'encoding_cache.json')
@@ -193,8 +195,21 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 			if detect_on_fail:
 				detect(view, file_name)
 				return
-			sublime.error_message('Can not convert file %s with %s, please try another encoding.' % (file_name, encoding))
-			return
+			if CONFIRM_IS_AVAILABLE:
+				if sublime.ok_cancel_dialog('Errors occurred while converting %s file with %s encoding.\n\n'
+						'Continue to load this file using %s encoding (malformed data will be replaced by a marker)?'
+						'\n\nPress "Cancel" to choose another encoding manually.' %
+						(os.path.basename(file_name), encoding, encoding)):
+					fp.close()
+					fp = codecs.open(file_name, 'rb', encoding, errors='replace')
+					contents = fp.read()
+				else:
+					return
+			else:
+				sublime.error_message('Errors occurred while converting %s file with %s encoding.\n\n'
+						'Please choose another encoding manually or upgrade your Sublime Text.' %
+						(os.path.basename(file_name), encoding))
+				return
 		finally:
 			fp.close()
 		encoding_cache.set(file_name, encoding)
@@ -237,7 +252,8 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 			fp = file(file_name, 'rb')
 			contents = codecs.EncodedFile(fp, encoding, 'UTF-8').read()
 		except UnicodeEncodeError, e:
-			sublime.error_message('Can not convert file encoding of %s to %s, it was saved as UTF-8 instead.' %  (file_name, encoding))
+			sublime.error_message('Can not convert file encoding of %s to %s, it was saved as UTF-8 instead.' %
+					(os.path.basename(file_name), encoding))
 			return
 		finally:
 			fp.close()
