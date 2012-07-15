@@ -1,4 +1,14 @@
 {
+	// supported encoding list, name & code in pair
+	"encoding_list" : [
+		["Chinese Simplified (GBK)", "GBK"],
+		["Chinese Traditional (BIG5)", "BIG5-HKSCS"],
+		["Korean (EUC-KR)", "EUC-KR"],
+		["Japanese (Shift_JIS)", "Shift_JIS"],
+		["Japanese (EUC-JP)", "EUC-JP"],
+		["UTF-8", "UTF-8"]
+	],
+
 	// Maximum size for encoding cache, 0 means no cache
 	"max_cache_size" : 100,
 

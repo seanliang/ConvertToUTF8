@@ -16,6 +16,9 @@ REVERTING_FILES = []
 
 CONFIRM_IS_AVAILABLE = (sublime.version() > '2186')
 
+ENCODINGS_NAME = []
+ENCODINGS_CODE = []
+
 class EncodingCache(object):
 	def __init__(self):
 		self.cache_file = os.path.join(sublime.packages_path(), 'User', 'encoding_cache.json')
@@ -76,7 +79,11 @@ class EncodingCache(object):
 encoding_cache = EncodingCache()
 
 def get_settings():
+	global ENCODINGS_NAME, ENCODINGS_CODE
 	settings = sublime.load_settings('ConvertToUTF8.sublime-settings')
+	encoding_list = settings.get('encoding_list', [])
+	ENCODINGS_NAME = [pair[0] for pair in encoding_list]
+	ENCODINGS_CODE = [pair[1] for pair in encoding_list]
 	encoding_cache.set_max_size(settings.get('max_cache_size', 100))
 	SETTINGS['max_detect_lines'] = settings.get('max_detect_lines', 600)
 	SETTINGS['convert_on_load'] = settings.get('convert_on_load', 'always')
@@ -116,6 +123,7 @@ def check_encoding(view, encoding, confidence):
 		if view_encoding == view.settings().get('fallback_encoding'):
 			# show error only when the ST2 can't detect the encoding either
 			view.set_status('origin_encoding', 'Encoding can not be detected, please choose one manually. (%s/%.2f)' % (encoding, confidence))
+			show_selection(view)
 			return
 		else:
 			# using encoding detected by ST2
@@ -162,6 +170,28 @@ def remove_reverting(file_name):
 	while file_name in REVERTING_FILES:
 		REVERTING_FILES.remove(file_name)
 
+class EncodingSelection(threading.Thread):
+	def __init__(self, view):
+		threading.Thread.__init__(self)
+		self.view = view
+
+	def run(self):
+		sublime.set_timeout(self.show_panel, 0)
+
+	def show_panel(self):
+		window = self.view.window()
+		if window:
+			window.show_quick_panel(ENCODINGS_NAME, self.on_done)
+
+	def on_done(self, selected):
+		if selected == -1:
+			clean_encoding_vars(self.view)
+		else:
+			init_encoding_vars(self.view, ENCODINGS_CODE[selected])
+
+def show_selection(view):
+	EncodingSelection(view).start()
+
 stamps = {}
 
 class ConvertToUtf8Command(sublime_plugin.TextCommand):
@@ -203,13 +233,12 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 					fp = codecs.open(file_name, 'rb', encoding, errors='replace')
 					contents = fp.read()
 				else:
-					clean_encoding_vars(view)
+					show_selection(view)
 					return
 			else:
-				clean_encoding_vars(view)
-				sublime.error_message('Errors occurred while converting %s file with %s encoding.\n\n'
-						'Please choose another encoding manually or upgrade your Sublime Text.' %
+				view.set_status('origin_encoding', 'Errors occurred while converting %s file with %s encoding' %
 						(os.path.basename(file_name), encoding))
+				show_selection(view)
 				return
 		finally:
 			fp.close()
