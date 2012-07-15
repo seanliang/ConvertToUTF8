@@ -16,6 +16,7 @@ Otherwise, you can download this repository as a zip file, unzip it, and rename 
 Configuration
 ------------------
 Please check [Configuration file](ConvertToUTF8.sublime-settings) for details.
+* encoding_list: encoding list for selection when detection is failed
 * max_cache_size: maximum size of encoding cache, 0 means no cache (default: 100)
 * max_detect_lines: maximum lines to detect, 0 means unlimited (default: 600)
 * convert_on_load: if set to never, the file will not be decoded when opening (default: always)
