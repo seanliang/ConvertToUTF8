@@ -17,7 +17,6 @@
 * max_detect_lines：最大检测行数，0 表示不限制（默认为 600）
 * preview_action：指定预览模式下的动作，可选项为：no_action 不作任何动作，convert_and_open 转换编码并打开（默认为 no_action）
 * convert_on_load：启用/禁用文件装载时将窗口内容转换成UTF-8编码（默认为 always）
-* skip_when_preview：是否跳过以预览方式打开的文件 (默认为 false)
 * convert_on_save：启用/禁用文件保存时将其从UTF-8转换成指定转码（默认为 always）
 
 使用说明
