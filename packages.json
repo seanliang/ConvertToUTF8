@@ -6,11 +6,11 @@
 			"description": "For editing and saving files encoded in GBK, BIG5, EUC-KR, EUC-JP, Shift_JIS, etc.",
 			"author": "Sean Liang",
 			"homepage": "https://github.com/seanliang/ConvertToUTF8",
-			"last_modified": "2012-07-19 19:50:00",
+			"last_modified": "2012-07-27 11:00:00",
 			"platforms": {
 				"*": [
 					{
-						"version": "1.0.0",
+						"version": "1.1.0",
 						"url": "https://nodeload.github.com/seanliang/ConvertToUTF8/zipball/master"
 					}
 				]

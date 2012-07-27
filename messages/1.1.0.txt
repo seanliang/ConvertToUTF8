@@ -1,0 +1,13 @@
+ConvertToUTF8 1.1.0 Changelog
+
+New Features
+- Added "preview_action" setting to control the behaviour when previewing
+  a file. Available options:
+  * no_action: keep the file untouched until it's opened (default)
+  * convert_and_open: convert and open the file when nescessary, default
+    behaviour before version 1.1.0
+
+新功能
+- 增加 preview_action 设置，用于控制预览文件时的行为。可选项：
+  * no_action：不作任何动作直到文件被明确打开（默认）
+  * convert_and_open：在必要时转换并打开文件，1.1.0版本前的默认行为

@@ -1,0 +1,37 @@
+ConvertToUTF8
+==================
+With this plugin, you can edit and save the files which encodings are not supported by Sublime Text currently, especially for those used by CJK users, such as GB2312, GBK, BIG5, EUC-KR, EUC-JP, etc.
+
+Configuration
+------------------
+Please check ConvertToUTF8.sublime-settings file for details. You should save your personal settings in a file named "ConvertToUTF8.sublime-settings" under "User" folder.
+
+* encoding_list: encoding selection list when detection is failed
+* max_cache_size: maximum encoding cache size, 0 means no cache (default: 100)
+* max_detect_lines: maximum detection lines, 0 means unlimited (default: 600)
+* preview_action: specific the action when previewing a file, available options are no_action, convert_and_open (default: no_action)
+* convert_on_load: enable/disable convert file content to UTF-8 when it is loaded (default: always)
+* convert_on_save: enable/disable convert file from UTF-8 to a specific encoding when it is saved (default: always)
+
+Contact me
+------------------
+Please visit me if you have any question or suggestion at: http://weibo.com/seanliang
+
+==================
+通过本插件，您可以编辑并保存目前编码不被 Sublime Text 支持的文件，特别是中日韩用户使用的 GB2312，GBK，BIG5，EUC-KR，EUC-JP 等。
+
+设置
+------------------
+请查看 ConvertToUTF8.sublime-settings 文件获取详细信息。为防止更新插件时被覆盖，请将个人设置保存到 User 目录中名为 ConvertToUTF8.sublime-settings 文件中。
+
+* encoding_list：检测失败时显示的编码列表
+* max_cache_size：最大编码缓存数量，0 表示不缓存（默认为 100）
+* max_detect_lines：最大检测行数，0 表示不限制（默认为 600）
+* preview_action：指定预览模式下的动作，可选项为：no_action 不作任何动作，convert_and_open 转换编码并打开（默认为 no_action）
+* convert_on_load：启用/禁用文件装载时将窗口内容转换成UTF-8编码（默认为 always）
+* skip_when_preview：是否跳过以预览方式打开的文件 (默认为 false)
+* convert_on_save：启用/禁用文件保存时将其从UTF-8转换成指定转码（默认为 always）
+
+联系我
+------------------
+有什么问题或建议，欢迎给我留言：http://weibo.com/seanliang

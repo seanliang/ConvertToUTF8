@@ -86,6 +86,7 @@ def get_settings():
 	ENCODINGS_CODE = [pair[1] for pair in encoding_list]
 	encoding_cache.set_max_size(settings.get('max_cache_size', 100))
 	SETTINGS['max_detect_lines'] = settings.get('max_detect_lines', 600)
+	SETTINGS['preview_action'] = settings.get('preview_action', 'no_action')
 	SETTINGS['convert_on_load'] = settings.get('convert_on_load', 'always')
 	SETTINGS['convert_on_save'] = settings.get('convert_on_save', 'always')
 
@@ -314,6 +315,9 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 	def on_clone(self, view):
 		clone_numbers = view.settings().get('clone_numbers', 0)
 		view.settings().set('clone_numbers', clone_numbers + 1)
+		encoding = view.settings().get('origin_encoding')
+		if encoding:
+			view.set_status('origin_encoding', encoding)
 
 	def on_close(self, view):
 		clone_numbers = view.settings().get('clone_numbers', 0)
@@ -331,7 +335,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		if self.check_clones(view):
 			return
 		encoding = view.settings().get('origin_encoding')
-		if encoding:
+		if encoding and not view.get_status('origin_encoding'):
 			view.set_status('origin_encoding', encoding)
 			# file is reloading
 			if view.settings().get('prevent_detect'):
@@ -341,11 +345,57 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 					return
 				else:
 					# treat as a new file
-					view.settings().erase('prevent_detect')
+					sublime.set_timeout(lambda: self.clean_reload(view, file_name), 250)
+					return
 			else:
 				return
 		if SETTINGS['convert_on_load'] == 'never':
 			return
+		self.perform_action(view, file_name, 5)
+
+	def on_activated(self, view):
+		if view.is_loading():
+			return
+		if view.encoding() == 'Hexadecimal':
+			return
+		file_name = view.file_name()
+		if not file_name:
+			return
+		if self.check_clones(view):
+			return
+		if view.settings().get('origin_encoding'):
+			return
+		if SETTINGS['convert_on_load'] == 'never':
+			return
+		if view.settings().get('is_preview'):
+			self.perform_action(view, file_name, 3)
+
+	def is_preview(self, view):
+		window = view.window()
+		if not window:
+			return True
+		view_index = window.get_view_index(view)
+		return view_index[1] == -1
+
+	def clean_reload(self, view, file_name):
+		window = view.window()
+		if not window:
+			sublime.set_timeout(lambda: self.clean_reload(view, file_name), 100)
+			return
+		for v in window.views():
+			if v.file_name() == file_name:
+				v.settings().erase('prevent_detect')
+		threading.Thread(target=lambda: detect(view, file_name)).start()
+
+	def perform_action(self, view, file_name, times):
+		if SETTINGS['preview_action'] != 'convert_and_open' and self.is_preview(view):
+			if times > 0:
+				# give it another chance before everything is ready
+				sublime.set_timeout(lambda: self.perform_action(view, file_name, times - 1), 100)
+				return
+			view.settings().set('is_preview', True)
+			return
+		view.settings().erase('is_preview')
 		threading.Thread(target=lambda: detect(view, file_name)).start()
 
 	def on_modified(self, view):

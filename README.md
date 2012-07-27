@@ -1,11 +1,6 @@
 Description (中文说明见README.zh_CN.md)
 ------------------
-This Sublime Text 2 plug-in aims to help people view and edit text files which encodings are not supported currently by Sublime Text, especially for CJK users who using GB2312, GBK, BIG5, EUC-KR, EUC-JP, etc.
-
-It will:
-* finds the proper encoding of current file when a file is loaded
-* converts and reloads the file content for user viewing and editing
-* converts the file content to original encoding when the file is saved
+With this plugin, you can edit and save the files which encodings are not supported by Sublime Text currently, especially for those used by CJK users, such as GB2312, GBK, BIG5, EUC-KR, EUC-JP, etc.
 
 Installation
 ------------------
@@ -15,22 +10,23 @@ Otherwise, you can download this repository as a zip file, unzip it, and rename 
 
 Configuration
 ------------------
-Please check [Configuration file](ConvertToUTF8.sublime-settings) for details.
-* encoding_list: encoding list for selection when detection is failed
-* max_cache_size: maximum size of encoding cache, 0 means no cache (default: 100)
-* max_detect_lines: maximum lines to detect, 0 means unlimited (default: 600)
-* convert_on_load: if set to never, the file will not be decoded when opening (default: always)
-* convert_on_save: if set to never, the file will be encoded as UTF-8 when saving (default: always)
+Please check ConvertToUTF8.sublime-settings file for details. You should save your personal settings in a file named "ConvertToUTF8.sublime-settings" under "User" folder.
+
+* encoding_list: encoding selection list when detection is failed
+* max_cache_size: maximum encoding cache size, 0 means no cache (default: 100)
+* max_detect_lines: maximum detection lines, 0 means unlimited (default: 600)
+* preview_action: specific the action when previewing a file, available options are no_action, convert_and_open (default: no_action)
+* convert_on_load: enable/disable convert file content to UTF-8 when it is loaded (default: always)
+* convert_on_save: enable/disable convert file from UTF-8 to a specific encoding when it is saved (default: always)
 
 Usage
 ------------------
-The plug-in will detect the encoding of opening files, then convert them to UTF-8 for viewing and editing, and convert them back to original encoding when saving.
+In most cases, this plug-in will take care of encoding issues automatically.
 
-ConvertToUTF8 creates an entry "Set File Encoding to" under "File" menu. You can use it to translate between different encodings. For example, you can open a UTF-8 file, and save it to GBK, and vice versa.
+You can also use the "File > Set File Encoding to" menu entry to transform between different encodings. For example, you can open a UTF-8 file, and save it to GBK, and vice versa.
 
 Note:
-* if "convert_on_load" is set to never, ConvertToUTF8 will decode the file using selected encoding
-* if "convert_on_save" is set to never, the file will *NEVER* be saved to selected encoding
+* if "convert_on_save" is set to never, the file will *NEVER* be saved to the selected encoding
 * please do not edit the file before the encoding detection process is finished
 * please try either increasing the value of max_detect_lines or set the encoding manually if the detection result is not accurate
 
