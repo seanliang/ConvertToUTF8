@@ -15,9 +15,9 @@
 * encoding_list：检测失败时显示的编码列表
 * max_cache_size：最大编码缓存数量，0 表示不缓存（默认为 100）
 * max_detect_lines：最大检测行数，0 表示不限制（默认为 600）
-* preview_action：指定预览模式下的动作，可选项为：no_action 不作任何动作，convert_and_open 转换编码并打开（默认为 no_action）
-* convert_on_load：启用/禁用文件装载时将窗口内容转换成UTF-8编码（默认为 always）
-* convert_on_save：启用/禁用文件保存时将其从UTF-8转换成指定转码（默认为 always）
+* preview_action：指定预览模式下的动作，可选项：no_action 不作任何动作，convert_and_open 转换编码并打开（默认为 no_action）
+* convert_on_load：启用/禁用文件装载时将窗口内容转换成UTF-8编码，可选项：always 自动转换，never 不转换（默认为 always）
+* convert_on_save：启用/禁用文件保存时将其从UTF-8转换成指定转码，可选项：always 自动转换，never 不转换（默认为 always）
 
 使用说明
 ------------------
@@ -33,6 +33,21 @@
 
 常见问题
 ------------------
+* 问：安装后无法工作，要如何修复？
+
+  答：请尝试以下步骤：
+  1. 重启 Sublime Text
+  2. 请确认插件目录名为 ConvertToUTF8（如果是通过 Package Control 安装的可略过此步骤）
+  3. 如果您的系统是64位 Ubuntu，请手工安装 Python 2.6
+<code>  
+sudo add-apt-repository ppa:fkrull/deadsnakes  
+sudo apt-get update  
+sudo apt-get install python2.6  
+sudo ln -s /usr/lib/python2.6 /PATH_TO_ST2/lib  
+</code>
+  4. 禁用其他编码相关的插件
+  5. 联系我
+
 * 问：这个插件支持哪些编码？
 
   答：只要你的系统支持的编码应该都可使用。
@@ -51,4 +66,4 @@
 
 联系我
 ------------------
-有什么问题或建议，欢迎给我留言：http://weibo.com/seanliang
+请发送您的问题或建议给我：sunlxy (at) yahoo.com 或 http://weibo.com/seanliang

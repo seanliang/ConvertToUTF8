@@ -1,0 +1,4 @@
+ConvertToUTF8 1.1.1 Changelog
+
+Enhancements
+- Perform detection when content was modified in preview mode

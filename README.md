@@ -15,9 +15,9 @@ Please check ConvertToUTF8.sublime-settings file for details. You should save yo
 * encoding_list: encoding selection list when detection is failed
 * max_cache_size: maximum encoding cache size, 0 means no cache (default: 100)
 * max_detect_lines: maximum detection lines, 0 means unlimited (default: 600)
-* preview_action: specific the action when previewing a file, available options are no_action, convert_and_open (default: no_action)
-* convert_on_load: enable/disable convert file content to UTF-8 when it is loaded (default: always)
-* convert_on_save: enable/disable convert file from UTF-8 to a specific encoding when it is saved (default: always)
+* preview_action: specific the action when previewing a file, available options: no_action, convert_and_open (default: no_action)
+* convert_on_load: enable/disable convert file content to UTF-8 when it is loaded, available options: always, never (default: always)
+* convert_on_save: enable/disable convert file from UTF-8 to a specific encoding when it is saved, available options: always, never (default: always)
 
 Usage
 ------------------
@@ -33,6 +33,21 @@ Note:
 
 Q & A
 ------------------
+* Q: It is not working after installation, how do I fix it?
+
+  A: Please try the following steps:
+  1. Restart Sublime Text
+  2. Make sure the plug-in folder is named "ConvertToUTF8" (skip this step if you install via "Package Control")
+  3. Install Python 2.6 manually if you are running Ubuntu 64bit
+<code>  
+sudo add-apt-repository ppa:fkrull/deadsnakes  
+sudo apt-get update  
+sudo apt-get install python2.6  
+sudo ln -s /usr/lib/python2.6 /PATH_TO_ST2/lib  
+</code>
+  4. Disable other encoding related plug-ins
+  5. Contact me
+
 * Q: Which encodings are supported?
 
   A: Any encoding your system supported should be fine.
@@ -51,4 +66,4 @@ Q & A
 
 Contact me
 ------------------
-Please visit me if you have any question or suggestion at: http://weibo.com/seanliang
+Please send me your questions or suggestions: sunlxy (at) yahoo.com or http://weibo.com/seanliang

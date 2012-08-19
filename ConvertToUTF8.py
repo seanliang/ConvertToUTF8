@@ -218,6 +218,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		if not (file_name and os.path.exists(file_name)):
 			return
 		# try fast decode
+		fp = None
 		try:
 			fp = codecs.open(file_name, 'rb', encoding, errors='strict')
 			contents = fp.read()
@@ -242,7 +243,8 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 				show_selection(view)
 				return
 		finally:
-			fp.close()
+			if fp:
+				fp.close()
 		encoding_cache.set(file_name, encoding)
 		contents = contents.replace('\r\n', '\n').replace('\r', '\n')
 		regions = sublime.Region(0, view.size())
@@ -279,6 +281,7 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		if not encoding or encoding == 'UTF-8':
 			encoding_cache.pop(file_name)
 			return
+		fp = None
 		try:
 			fp = file(file_name, 'rb')
 			contents = codecs.EncodedFile(fp, encoding, 'UTF-8').read()
@@ -287,7 +290,8 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 					(os.path.basename(file_name), encoding))
 			return
 		finally:
-			fp.close()
+			if fp:
+				fp.close()
 		fp = file(file_name, 'wb')
 		fp.write(contents)
 		fp.close()
@@ -405,6 +409,9 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		if not file_name or view.is_loading():
 			return
 		if not view.settings().get('in_converting'):
+			if view.settings().get('is_preview'):
+				view.settings().erase('is_preview')
+				detect(view, file_name)
 			return
 		if self.check_clones(view):
 			return
