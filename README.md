@@ -1,6 +1,8 @@
-Description (中文说明见README.zh_CN.md)
+Description (中文说明见[README.zh_CN.md](https://github.com/seanliang/ConvertToUTF8/blob/master/README.zh_CN.md))
 ------------------
 With this plugin, you can edit and save the files which encodings are not supported by Sublime Text currently, especially for those used by CJK users, such as GB2312, GBK, BIG5, EUC-KR, EUC-JP, etc.
+
+![ConvertToUTF8](http://dl.dropbox.com/u/31937639/ConvertToUTF8/ConvertToUTF8.gif)
 
 Installation
 ------------------
