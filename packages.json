@@ -15,6 +15,20 @@
 					}
 				]
 			}
+		}, {
+			"name": "JavaPropertiesEditor",
+			"description": "Sublime Text 2 plugin for editing Java properties files in native languages",
+			"author": "Sean Liang",
+			"homepage": "https://github.com/seanliang/JavaPropertiesEditor",
+			"last_modified": "2012-09-02 22:00:00",
+			"platforms": {
+				"*": [
+					{
+						"version": "1.0.0",
+						"url": "https://nodeload.github.com/seanliang/JavaPropertiesEditor/zipball/master"
+					}
+				]
+			}
 		}
 	]
 }
