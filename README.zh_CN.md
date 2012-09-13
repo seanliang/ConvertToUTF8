@@ -10,6 +10,10 @@
 
 如需手工安装，请将本项目打包下载并解压，将解压后的文件夹名修改为 *ConvertToUTF8* ，然后将此文件夹移动到 Sublime Text 的 *Packages* 文件夹下（可通过 Sublime Text 菜单中的 Preferences > Browse Packages 找到 *Packages* 文件夹）。
 
+您的文件夹应该看起来是这样的：
+
+![Folder Hierarchy](http://dl.dropbox.com/u/31937639/ConvertToUTF8/hierarchy.png)
+
 设置
 ------------------
 请查看 ConvertToUTF8.sublime-settings 文件获取详细信息。为防止更新插件时被覆盖，请将个人设置保存到 User 目录中名为 ConvertToUTF8.sublime-settings 文件中。
@@ -25,7 +29,7 @@
 ------------------
 多数情况下，本插件将自动对处理编码相关的事项。
 
-你也可以通过 File > Set File Encoding to 菜单对文件编码进行手工转换。例如，你可以打开一个 UTF-8 编码的文件，指定保存为 GBK，反之亦然。
+您也可以通过 File > Set File Encoding to 菜单对文件编码进行手工转换。例如，您可以打开一个 UTF-8 编码的文件，指定保存为 GBK，反之亦然。
 
 注意：
 * 如果 convert_on_save 被设置为 never，文件不会被保存成指定编码
@@ -52,7 +56,7 @@ sudo ln -s /usr/lib/python2.6 /PATH_TO_ST2/lib
 
 * 问：这个插件支持哪些编码？
 
-  答：只要你的系统支持的编码应该都可使用。
+  答：只要您的系统支持的编码应该都可使用。
 
 * 问：为何有时重新激活窗口，里面的内容会变乱码？
 
@@ -60,7 +64,7 @@ sudo ln -s /usr/lib/python2.6 /PATH_TO_ST2/lib
 
 * 问：为什么重新激活窗口时，ST2 问我文件“已经被修改。是否要重新载入？”
 
-  答：原因与上一条相同。如果你有未保存的修改，请选择“取消”。
+  答：原因与上一条相同。如果您有未保存的修改，请选择“取消”。
 
 * 问：在保存文件时，Sublime Text 为什么提示将文件保存为 UTF-8？
 
