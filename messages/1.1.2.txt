@@ -1,0 +1,4 @@
+ConvertToUTF8 1.1.2 Changelog
+
+Enhancements
+- Skip encoding detection of file with BOM

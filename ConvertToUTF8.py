@@ -96,10 +96,11 @@ def init_settings():
 
 init_settings()
 
-def detect(view, file_name):
+def detect(view, file_name, encoding):
 	if not os.path.exists(file_name):
 		return
-	encoding = encoding_cache.pop(file_name)
+	if not encoding.endswith(' with BOM'):
+		encoding = encoding_cache.pop(file_name)
 	if encoding:
 		sublime.set_timeout(lambda: init_encoding_vars(view, encoding, detect_on_fail=True), 0)
 		return
@@ -224,7 +225,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 			contents = fp.read()
 		except UnicodeDecodeError, e:
 			if detect_on_fail:
-				detect(view, file_name)
+				detect(view, file_name, view.encoding())
 				return
 			if CONFIRM_IS_AVAILABLE:
 				if sublime.ok_cancel_dialog('Errors occurred while converting %s file with %s encoding.\n\n'
@@ -389,7 +390,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		for v in window.views():
 			if v.file_name() == file_name:
 				v.settings().erase('prevent_detect')
-		threading.Thread(target=lambda: detect(view, file_name)).start()
+		encoding = view.encoding()
+		threading.Thread(target=lambda: detect(view, file_name, encoding)).start()
 
 	def perform_action(self, view, file_name, times):
 		if SETTINGS['preview_action'] != 'convert_and_open' and self.is_preview(view):
@@ -400,10 +402,12 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			view.settings().set('is_preview', True)
 			return
 		view.settings().erase('is_preview')
-		threading.Thread(target=lambda: detect(view, file_name)).start()
+		encoding = view.encoding()
+		threading.Thread(target=lambda: detect(view, file_name, encoding)).start()
 
 	def on_modified(self, view):
-		if view.encoding() == 'Hexadecimal':
+		encoding = view.encoding()
+		if encoding == 'Hexadecimal':
 			return
 		file_name = view.file_name()
 		if not file_name or view.is_loading():
@@ -411,7 +415,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		if not view.settings().get('in_converting'):
 			if view.settings().get('is_preview'):
 				view.settings().erase('is_preview')
-				detect(view, file_name)
+				detect(view, file_name, encoding)
 			return
 		if self.check_clones(view):
 			return
@@ -434,7 +438,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 				if view.settings().get('prevent_detect'):
 					sublime.set_timeout(lambda: self.undo_me(view), 0)
 				else:
-					threading.Thread(target=lambda: detect(view, file_name)).start()
+					threading.Thread(target=lambda: detect(view, file_name, encoding)).start()
 		else:
 			view.set_scratch(False)
 
