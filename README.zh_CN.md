@@ -22,6 +22,7 @@
 * max_cache_size：最大编码缓存数量，0 表示不缓存（默认为 100）
 * max_detect_lines：最大检测行数，0 表示不限制（默认为 600）
 * preview_action：指定预览模式下的动作，可选项：no_action 不作任何动作，convert_and_open 转换编码并打开（默认为 no_action）
+* default_encoding_on_create：指定新建文件的默认编码（如 GBK），空值表示使用 Sublime Text 的 default_encoding 设置（默认为空值）
 * convert_on_load：启用/禁用文件装载时将窗口内容转换成UTF-8编码，可选项：always 自动转换，never 不转换（默认为 always）
 * convert_on_save：启用/禁用文件保存时将其从UTF-8转换成指定转码，可选项：always 自动转换，never 不转换（默认为 always）
 

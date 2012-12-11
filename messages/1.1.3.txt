@@ -1,0 +1,5 @@
+ConvertToUTF8 1.1.3 Changelog
+
+New Features
+- Added "default_encoding_on_create" setting. A non-empty value, "GBK" for example,
+  will be used as the encoding of newly created file.

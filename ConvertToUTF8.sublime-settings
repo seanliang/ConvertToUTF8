@@ -18,6 +18,9 @@
 	// Action when previewing file: no_action or convert_and_open
 	"preview_action" : "no_action",
 
+	// Encoding for new file, empty means using sublime text's "default_encoding" setting
+	"default_encoding_on_create" : "",
+
 	// Convert encoding options when loading/saving: always, never
 	"convert_on_load" : "always",
 	"convert_on_save" : "always"

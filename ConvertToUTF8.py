@@ -87,6 +87,7 @@ def get_settings():
 	encoding_cache.set_max_size(settings.get('max_cache_size', 100))
 	SETTINGS['max_detect_lines'] = settings.get('max_detect_lines', 600)
 	SETTINGS['preview_action'] = settings.get('preview_action', 'no_action')
+	SETTINGS['default_encoding_on_create'] = settings.get('default_encoding_on_create', '')
 	SETTINGS['convert_on_load'] = settings.get('convert_on_load', 'always')
 	SETTINGS['convert_on_save'] = settings.get('convert_on_save', 'always')
 
@@ -316,6 +317,10 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 				return True
 			view.settings().erase('check_times')
 		return False
+
+	def on_new(self, view):
+		if SETTINGS['default_encoding_on_create']:
+			init_encoding_vars(view, SETTINGS['default_encoding_on_create'], False)
 
 	def on_clone(self, view):
 		clone_numbers = view.settings().get('clone_numbers', 0)
