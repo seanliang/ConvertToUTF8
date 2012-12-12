@@ -10,6 +10,7 @@
 					{ "caption": "Chinese Simplified (GBK)", "command": "convert_to_utf8", "args": {"encoding": "GBK", "stamp": "0" } },
 					{ "caption": "Chinese Traditional (BIG5)", "command": "convert_to_utf8", "args": {"encoding": "BIG5-HKSCS", "stamp": "0" } },
 					{ "caption": "Korean (EUC-KR)", "command": "convert_to_utf8", "args": {"encoding": "EUC-KR", "stamp": "0" } },
+					{ "caption": "Japanese (CP932)", "command": "convert_to_utf8", "args": {"encoding": "CP932", "stamp": "0" } },
 					{ "caption": "Japanese (Shift_JIS)", "command": "convert_to_utf8", "args": {"encoding": "Shift_JIS", "stamp": "0" } },
 					{ "caption": "Japanese (EUC-JP)", "command": "convert_to_utf8", "args": {"encoding": "EUC-JP", "stamp": "0" } },
 					{ "caption": "-" },

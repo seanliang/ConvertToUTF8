@@ -110,6 +110,8 @@ def detect(view, file_name, encoding):
 	cnt = SETTINGS['max_detect_lines']
 	fp = file(file_name, 'rb')
 	for line in fp:
+		# cut MS-Windows CR code
+		line = line.replace('\r','')
 		detector.feed(line)
 		cnt -= 1
 		if detector.done or cnt == 0:
