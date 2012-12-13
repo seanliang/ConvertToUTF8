@@ -1,0 +1,4 @@
+ConvertToUTF8 1.1.4 Changelog
+
+New Features
+- Added detection for CP932 encoding (Thanks to @hashy)
