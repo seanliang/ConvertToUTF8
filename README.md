@@ -50,8 +50,9 @@ Q & A
 sudo add-apt-repository ppa:fkrull/deadsnakes  
 sudo apt-get update  
 sudo apt-get install python2.6  
-sudo ln -s /usr/lib/python2.6 /PATH_TO_ST2/lib  
+sudo ln -s /usr/lib/python2.6 /[PATH_TO_ST2]/lib  
 </code>
+** Note: PATH_TO_ST2 means the installation location of Sublime Text 2 **
   4. Disable other encoding related plug-ins
   5. Contact me
 

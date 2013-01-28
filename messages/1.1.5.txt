@@ -1,0 +1,5 @@
+ConvertToUTF8 1.1.5 Changelog
+
+Enhancements
+- More friendly instructions for linux platform
+- Reduce the size of cache file

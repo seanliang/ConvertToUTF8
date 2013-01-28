@@ -14,10 +14,12 @@ SKIP_ENCODINGS = ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE')
 SETTINGS = {}
 REVERTING_FILES = []
 
-CONFIRM_IS_AVAILABLE = (sublime.version() > '2186')
+CONFIRM_IS_AVAILABLE = ('ok_cancel_dialog' in dir(sublime))
 
 ENCODINGS_NAME = []
 ENCODINGS_CODE = []
+
+PY26_HELP = os.path.join(sublime.packages_path(), 'ConvertToUTF8', 'python26.txt')
 
 class EncodingCache(object):
 	def __init__(self):
@@ -50,6 +52,16 @@ class EncodingCache(object):
 		fp = file(self.cache_file, 'rb')
 		self.encoding_cache = json.load(fp)
 		fp.close()
+		if len(self.encoding_cache) > 0:
+			if self.encoding_cache[0].has_key('file'):
+				# old style cache
+				new_cache = []
+				for item in self.encoding_cache:
+					new_cache.append({
+						item['file']: item['encoding']
+					})
+				self.encoding_cache = new_cache
+				self.dirty = True
 
 	def save(self):
 		self.shrink()
@@ -60,10 +72,10 @@ class EncodingCache(object):
 
 	def pop(self, file_name):
 		for item in self.encoding_cache:
-			if item['file'] == file_name:
+			if item.has_key(file_name):
 				self.encoding_cache.remove(item)
 				self.dirty = True
-				return item['encoding']
+				return item.get(file_name)
 		return None
 
 	def set(self, file_name, encoding):
@@ -71,8 +83,7 @@ class EncodingCache(object):
 			return
 		self.pop(file_name)
 		self.encoding_cache.insert(0, {
-			'file': file_name,
-			'encoding': encoding
+			file_name: encoding
 		})
 		self.dirty = True
 
@@ -119,26 +130,28 @@ def detect(view, file_name, encoding):
 	fp.close()
 	detector.close()
 	encoding = detector.result['encoding']
+	if encoding:
+		encoding = encoding.upper()
+		if encoding == 'BIG5':
+			encoding = 'BIG5-HKSCS'
+		elif encoding == 'GB2312':
+			encoding = 'GBK'
 	confidence = detector.result['confidence']
 	sublime.set_timeout(lambda: check_encoding(view, encoding, confidence), 0)
 
 def check_encoding(view, encoding, confidence):
-	if not encoding or confidence < 0.8:
+	view.set_status('origin_encoding', ('Detected {0} with {1:.0%} confidence'.format(encoding, confidence)) if encoding else 'Encoding can not be detected')
+	if not encoding or confidence < 0.95:
 		view_encoding = view.encoding()
 		if view_encoding == view.settings().get('fallback_encoding'):
 			# show error only when the ST2 can't detect the encoding either
-			view.set_status('origin_encoding', 'Encoding can not be detected, please choose one manually. (%s/%.2f)' % (encoding, confidence))
 			show_selection(view)
 			return
 		else:
 			# using encoding detected by ST2
+			if view_encoding == 'Undefined':
+				view_encoding = 'ASCII'
 			encoding = view_encoding
-	else:
-		encoding = encoding.upper()
-	if encoding == 'BIG5':
-		encoding = 'BIG5-HKSCS'
-	elif encoding == 'GB2312':
-		encoding = 'GBK'
 	init_encoding_vars(view, encoding)
 
 def show_encoding_status(view):
@@ -158,7 +171,7 @@ def init_encoding_vars(view, encoding, run_convert=True, stamp=None, detect_on_f
 	view.settings().set('in_converting', True)
 	if run_convert:
 		if stamp == None:
-			stamp = '%r' % time.time()
+			stamp = '{0}'.format(time.time())
 		translate_tabs_to_spaces = view.settings().get('translate_tabs_to_spaces')
 		view.settings().set('translate_tabs_to_spaces', False)
 		view.run_command('convert_to_utf8', {'detect_on_fail': detect_on_fail, 'stamp': stamp})
@@ -226,15 +239,21 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		try:
 			fp = codecs.open(file_name, 'rb', encoding, errors='strict')
 			contents = fp.read()
+		except LookupError, e:
+			clean_encoding_vars(view)
+			if sublime.platform() == 'linux':
+				view.window().open_file(PY26_HELP, sublime.TRANSIENT).set_scratch(True)
+			sublime.error_message('Encoding {0} is not supported.'.format(encoding))
+			return
 		except UnicodeDecodeError, e:
 			if detect_on_fail:
 				detect(view, file_name, view.encoding())
 				return
 			if CONFIRM_IS_AVAILABLE:
-				if sublime.ok_cancel_dialog('Errors occurred while converting %s file with %s encoding.\n\n'
-						'Continue to load this file using %s encoding (malformed data will be replaced by a marker)?'
-						'\n\nPress "Cancel" to choose another encoding manually.' %
-						(os.path.basename(file_name), encoding, encoding)):
+				if sublime.ok_cancel_dialog(u'Errors occurred while converting {0} with {1} encoding.\n\n'
+						'Continue to load this file using {1} (malformed data will be replaced by a marker)?'
+						'\n\nPress "Cancel" to choose another encoding manually.'.format
+						(os.path.basename(file_name), encoding)):
 					fp.close()
 					fp = codecs.open(file_name, 'rb', encoding, errors='replace')
 					contents = fp.read()
@@ -242,7 +261,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 					show_selection(view)
 					return
 			else:
-				view.set_status('origin_encoding', 'Errors occurred while converting %s file with %s encoding' %
+				view.set_status('origin_encoding', u'Errors occurred while converting {0} with {1} encoding'.format
 						(os.path.basename(file_name), encoding))
 				show_selection(view)
 				return
@@ -264,13 +283,13 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 			sel.add(sublime.Region(x.a, x.b))
 		view.set_viewport_position(vp)
 		stamps[file_name] = stamp
-		sublime.status_message('%s -> UTF8' % encoding)
+		sublime.status_message('{0} -> UTF8'.format(encoding))
 
 	def description(self):
 		encoding = self.view.settings().get('origin_encoding')
 		if not encoding:
 			return
-		return '%s -> UTF8' % encoding
+		return '{0} -> UTF8'.format(encoding)
 
 	def is_enabled(self):
 		return self.view.encoding() != 'Hexadecimal'
@@ -289,9 +308,9 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		try:
 			fp = file(file_name, 'rb')
 			contents = codecs.EncodedFile(fp, encoding, 'UTF-8').read()
-		except UnicodeEncodeError, e:
-			sublime.error_message('Can not convert file encoding of %s to %s, it was saved as UTF-8 instead.' %
-					(os.path.basename(file_name), encoding))
+		except (LookupError, UnicodeEncodeError), e:
+			sublime.error_message(u'Can not convert file encoding of {0} to {1}, it was saved as UTF-8 instead:\n\n{2}'.format
+					(os.path.basename(file_name), encoding, e.message))
 			return
 		finally:
 			if fp:
@@ -301,13 +320,13 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		fp.close()
 		encoding_cache.set(file_name, encoding)
 		view.settings().set('prevent_detect', True)
-		sublime.status_message('UTF8 -> %s' % encoding)
+		sublime.status_message('UTF8 -> {0}'.format(encoding))
 
 	def description(self):
 		encoding = self.view.settings().get('origin_encoding')
 		if not encoding:
 			return
-		return 'UTF8 -> %s' % encoding
+		return 'UTF8 -> {0}'.format(encoding)
 
 class ConvertToUTF8Listener(sublime_plugin.EventListener):
 	def check_clones(self, view):
@@ -366,21 +385,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		self.perform_action(view, file_name, 5)
 
 	def on_activated(self, view):
-		if view.is_loading():
-			return
-		if view.encoding() == 'Hexadecimal':
-			return
-		file_name = view.file_name()
-		if not file_name:
-			return
-		if self.check_clones(view):
-			return
-		if view.settings().get('origin_encoding'):
-			return
-		if SETTINGS['convert_on_load'] == 'never':
-			return
 		if view.settings().get('is_preview'):
-			self.perform_action(view, file_name, 3)
+			self.perform_action(view, view.file_name(), 3)
 
 	def is_preview(self, view):
 		window = view.window()
@@ -445,6 +451,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 				if view.settings().get('prevent_detect'):
 					sublime.set_timeout(lambda: self.undo_me(view), 0)
 				else:
+					# file was modified outside
 					threading.Thread(target=lambda: detect(view, file_name, encoding)).start()
 		else:
 			view.set_scratch(False)

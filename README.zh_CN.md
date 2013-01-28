@@ -50,8 +50,9 @@
 sudo add-apt-repository ppa:fkrull/deadsnakes  
 sudo apt-get update  
 sudo apt-get install python2.6  
-sudo ln -s /usr/lib/python2.6 /PATH_TO_ST2/lib  
+sudo ln -s /usr/lib/python2.6 /[PATH_TO_ST2]/lib  
 </code>
+** 注意：PATH_TO_ST2 是指 Sublime Text 2 的安装目录 **
   4. 禁用其他编码相关的插件
   5. 联系我
 
