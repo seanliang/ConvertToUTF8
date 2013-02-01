@@ -4,6 +4,11 @@
 
 ![ConvertToUTF8](http://dl.dropbox.com/u/31937639/ConvertToUTF8/ConvertToUTF8.gif)
 
+我现在正努力让本插件同时支持 Sublime Text 2 和 3。如果您觉得本插件对您有所帮助，您可以请我喝杯咖啡让我保持清醒。感谢各位的帮助！:)
+
+[![通过支付宝请我](http://dl.dropbox.com/u/31937639/alipay.png)](https://me.alipay.com/seanliang)
+[![通过PayPal请我](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=GP6Y25N7Q9E26&lc=US&item_name=Buy%20me%20a%20cup%20of%20coffee&item_number=ConvertToUTF8&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
+
 安装
 ------------------
 推荐使用 [Package Control](http://wbond.net/sublime_packages/package_control) 查找 *ConvertToUTF8* 进行自动下载安装与更新。
@@ -71,6 +76,10 @@ sudo ln -s /usr/lib/python2.6 /[PATH_TO_ST2]/lib
 * 问：在保存文件时，Sublime Text 为什么提示将文件保存为 UTF-8？
 
   答：没有关系，本插件会自动将文件内容保存为原始编码。
+
+* 问：我的文件被保存为UTF-8，而且变成了乱码，要如何恢复？
+
+  答：请打开这个文件，并确认它的编码是UTF-8，然后选择菜单项目“File -> Save with Encoding -> Western (Windows 1252)”，关闭再重新打开该文件即可。
 
 联系我
 ------------------
