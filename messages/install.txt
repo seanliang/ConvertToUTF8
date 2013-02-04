@@ -17,3 +17,5 @@ Please check ConvertToUTF8.sublime-settings file for details. You should save yo
 Contact me
 ------------------
 Please send me your questions or suggestions: sunlxy (at) yahoo.com or http://weibo.com/seanliang
+
+For more information, please visit: https://github.com/seanliang/ConvertToUTF8

@@ -3,7 +3,10 @@
 import sublime, sublime_plugin
 import sys
 import os
-from chardet.universaldetector import UniversalDetector
+if sys.version_info < (3, 0):
+	from chardet.universaldetector import UniversalDetector
+else:
+	from .chardet.universaldetector import UniversalDetector
 import codecs
 import threading
 import json
@@ -19,7 +22,7 @@ CONFIRM_IS_AVAILABLE = ('ok_cancel_dialog' in dir(sublime))
 ENCODINGS_NAME = []
 ENCODINGS_CODE = []
 
-PY26_HELP = os.path.join(sublime.packages_path(), 'ConvertToUTF8', 'python26.txt')
+PKG_PATH = None
 
 class EncodingCache(object):
 	def __init__(self):
@@ -49,11 +52,11 @@ class EncodingCache(object):
 	def load(self):
 		if not os.path.exists(self.cache_file):
 			return
-		fp = file(self.cache_file, 'rb')
+		fp = open(self.cache_file, 'r')
 		self.encoding_cache = json.load(fp)
 		fp.close()
 		if len(self.encoding_cache) > 0:
-			if self.encoding_cache[0].has_key('file'):
+			if 'file' in self.encoding_cache[0]:
 				# old style cache
 				new_cache = []
 				for item in self.encoding_cache:
@@ -65,14 +68,14 @@ class EncodingCache(object):
 
 	def save(self):
 		self.shrink()
-		fp = file(self.cache_file, 'wb')
+		fp = open(self.cache_file, 'w')
 		json.dump(self.encoding_cache, fp)
 		fp.close()
 		self.dirty = False
 
 	def pop(self, file_name):
 		for item in self.encoding_cache:
-			if item.has_key(file_name):
+			if file_name in item:
 				self.encoding_cache.remove(item)
 				self.dirty = True
 				return item.get(file_name)
@@ -87,7 +90,7 @@ class EncodingCache(object):
 		})
 		self.dirty = True
 
-encoding_cache = EncodingCache()
+encoding_cache = None
 
 def get_settings():
 	global ENCODINGS_NAME, ENCODINGS_CODE
@@ -103,10 +106,17 @@ def get_settings():
 	SETTINGS['convert_on_save'] = settings.get('convert_on_save', 'always')
 
 def init_settings():
+	global encoding_cache, PKG_PATH
+	encoding_cache = EncodingCache()
+	PKG_PATH = os.path.join(sublime.packages_path(), 'ConvertToUTF8')
 	get_settings()
 	sublime.load_settings('ConvertToUTF8.sublime-settings').add_on_change('get_settings', get_settings)
 
-init_settings()
+if 'sublime_api' in dir(sublime):
+	def plugin_loaded():
+		init_settings()
+else:
+	init_settings()
 
 def detect(view, file_name, encoding):
 	if not os.path.exists(file_name):
@@ -119,10 +129,10 @@ def detect(view, file_name, encoding):
 	sublime.set_timeout(lambda: view.set_status('origin_encoding', 'Detecting encoding, please wait...'), 0)
 	detector = UniversalDetector()
 	cnt = SETTINGS['max_detect_lines']
-	fp = file(file_name, 'rb')
+	fp = open(file_name, 'rb')
 	for line in fp:
 		# cut MS-Windows CR code
-		line = line.replace('\r','')
+		line = line.replace(b'\r',b'')
 		detector.feed(line)
 		cnt -= 1
 		if detector.done or cnt == 0:
@@ -212,6 +222,19 @@ def show_selection(view):
 
 stamps = {}
 
+class PyInstructionCommand(sublime_plugin.TextCommand):
+	def run(self, edit, encoding):
+		self.view.set_name('ConvertToUTF8 Instructions')
+		self.view.set_scratch(True)
+		self.view.settings().set("word_wrap", True)
+		fp = open(os.path.join(PKG_PATH, 'python26.txt'), 'r')
+		msg = fp.read()
+		fp.close()
+		msg += 'Version: {0}\nPlatform: {1}\nArch: {2}\nPath: {3}\nEncoding: {4}\nWhich method works for you: '.format(
+			sublime.version(), sublime.platform(), sublime.arch(), sys.path, encoding
+		)
+		self.view.insert(edit, 0, msg)
+
 class ConvertToUtf8Command(sublime_plugin.TextCommand):
 	def run(self, edit, encoding=None, stamp=None, detect_on_fail=False):
 		view = self.view
@@ -239,13 +262,12 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		try:
 			fp = codecs.open(file_name, 'rb', encoding, errors='strict')
 			contents = fp.read()
-		except LookupError, e:
+		except LookupError as e:
 			clean_encoding_vars(view)
-			if sublime.platform() == 'linux':
-				view.window().open_file(PY26_HELP, sublime.TRANSIENT).set_scratch(True)
 			sublime.error_message('Encoding {0} is not supported.'.format(encoding))
+			view.window().new_file().run_command('py_instruction', {'encoding': encoding})
 			return
-		except UnicodeDecodeError, e:
+		except UnicodeDecodeError as e:
 			if detect_on_fail:
 				detect(view, file_name, view.encoding())
 				return
@@ -275,9 +297,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		rs = [x for x in sel]
 		vp = view.viewport_position()
 		view.set_viewport_position(tuple([0, 0]))
-		edit = view.begin_edit()
 		view.replace(edit, regions, contents)
-		view.end_edit(edit)
 		sel.clear()
 		for x in rs:
 			sel.add(sublime.Region(x.a, x.b))
@@ -306,16 +326,16 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 			return
 		fp = None
 		try:
-			fp = file(file_name, 'rb')
+			fp = open(file_name, 'rb')
 			contents = codecs.EncodedFile(fp, encoding, 'UTF-8').read()
-		except (LookupError, UnicodeEncodeError), e:
+		except (LookupError, UnicodeEncodeError) as e:
 			sublime.error_message(u'Can not convert file encoding of {0} to {1}, it was saved as UTF-8 instead:\n\n{2}'.format
 					(os.path.basename(file_name), encoding, e.message))
 			return
 		finally:
 			if fp:
 				fp.close()
-		fp = file(file_name, 'wb')
+		fp = open(file_name, 'wb')
 		fp.write(contents)
 		fp.close()
 		encoding_cache.set(file_name, encoding)
@@ -438,7 +458,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			if command1[0] == 'convert_to_utf8':
 				view.run_command('redo')
 		elif command[0] == 'convert_to_utf8':
-			if stamps.has_key(file_name):
+			if file_name in stamps:
 				if stamps[file_name] == command[1].get('stamp'):
 					view.set_scratch(True)
 		elif command[0] == 'revert':
@@ -490,7 +510,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		if self.check_clones(view):
 			return
 		file_name = view.file_name()
-		if stamps.has_key(file_name):
+		if file_name in stamps:
 			del stamps[file_name]
 		if SETTINGS['convert_on_save'] == 'never':
 			return

@@ -4,10 +4,12 @@ With this plugin, you can edit and save the files which encodings are not suppor
 
 ![ConvertToUTF8](http://dl.dropbox.com/u/31937639/ConvertToUTF8/ConvertToUTF8.gif)
 
-I'm working on making this plugin support both Sublime Text 2 and 3 currently. If this plugin is useful for you, you might want to buy me a cup of coffee to keep me fresh. Thanks for everyone's help! :)
+I'm working on making ConvertToUTF8 support both Sublime Text 2 and 3 currently. If this plugin is useful for you, you might want to buy me a cup of coffee to keep me fresh. Thanks! :)
 
 [![Buy me a cup of coffee via PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=GP6Y25N7Q9E26&lc=US&item_name=Buy%20me%20a%20cup%20of%20coffee&item_number=ConvertToUTF8&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
 [![Buy me a cup of coffee via Alipay](http://dl.dropbox.com/u/31937639/alipay.png)](https://me.alipay.com/seanliang)
+
+** Please NOTE: Sublime Text 3 is still in its very early beta period, and [it lacks an API which ConvertToUTF8 depends on](http://www.sublimetext.com/forum/viewtopic.php?f=6&t=10892). ConvertToUTF8 might not work fully until this problem is resolved.
 
 Installation
 ------------------
@@ -50,7 +52,7 @@ Q & A
   A: Please try the following steps:
   1. Restart Sublime Text
   2. Make sure the plug-in folder is named "ConvertToUTF8" (skip this step if you install via "Package Control")
-  3. Install Python 2.6 manually if you are running Ubuntu 64bit
+  3. If you running Ubuntu 64bit, you can install [Codecs26](https://github.com/seanliang/Codecs26) plugin. If it doesn't work, you have to install Python 2.6 manually:
 <code>  
 sudo add-apt-repository ppa:fkrull/deadsnakes  
 sudo apt-get update  

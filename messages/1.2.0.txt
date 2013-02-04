@@ -1,0 +1,7 @@
+ConvertToUTF8 1.2.0 Changelog
+
+New Features
+- Forward compatible with Sublime Text 3
+- Add debug information gathering form
+
+** This version doesn't work with ST3 yet, please see https://github.com/seanliang/ConvertToUTF8 for more information **
