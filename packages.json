@@ -16,6 +16,20 @@
 				]
 			}
 		}, {
+			"name": "Codecs26",
+			"description": "Library files missing in the embedded Python of Sublime Text 2",
+			"author": "Sean Liang",
+			"homepage": "https://github.com/seanliang/Codecs26",
+			"last_modified": "2013-02-04 19:30:00",
+			"platforms": {
+				"linux": [
+					{
+						"version": "1.0.0",
+						"url": "https://nodeload.github.com/seanliang/Codecs26/zipball/master"
+					}
+				]
+			}
+		}, {
 			"name": "JavaPropertiesEditor",
 			"description": "Sublime Text 2 plugin for editing Java properties files in native languages",
 			"author": "Sean Liang",
