@@ -1,0 +1,9 @@
+ConvertToUTF8 1.2.1 Changelog
+
+New Features
+- Forward compatible with Sublime Text 3
+
+** For ST3:
+  - Only works with 3012 and above
+  - OS X and Linux users: You have to install an extra libraries to make this plugin work
+** Please see https://github.com/seanliang/ConvertToUTF8 for more information **

@@ -1,17 +1,4 @@
 Due to the limitation of embedded Python with Sublime Text, ConvertToUTF8 might not work properly.
 
-To solve this problem, you can try:
-
-1) Install Codecs26 plugin (https://github.com/seanliang/Codecs26). This plugin is compiled under 64bit Ubuntu, I'm not sure if it works with other Linux distro or 32-bit platforms.
-
-2) If the above method doesn't work, you will have to install Python 2.6 manually with these commands:
-=====================
-sudo add-apt-repository ppa:fkrull/deadsnakes
-sudo apt-get update
-sudo apt-get install python2.6
-sudo ln -s /usr/lib/python2.6 /[PATH_TO_ST2]/lib
-=====================
-** Note: PATH_TO_ST2 means the installation location of Sublime Text 2 **
-
-To make it better and easier for everyone, please kindly send the debug information to sunlxy#yahoo.com:
+You have to install an extra plugin to solve this problem, please kindly send the debug information to sunlxy#yahoo.com to get it:
 ====== Debug Information ======

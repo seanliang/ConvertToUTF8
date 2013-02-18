@@ -5,8 +5,10 @@ import sys
 import os
 if sys.version_info < (3, 0):
 	from chardet.universaldetector import UniversalDetector
+	NONE_COMMAND = (None, None, 0)
 else:
 	from .chardet.universaldetector import UniversalDetector
+	NONE_COMMAND = ('', None, 0)
 import codecs
 import threading
 import json
@@ -230,7 +232,7 @@ class PyInstructionCommand(sublime_plugin.TextCommand):
 		fp = open(os.path.join(PKG_PATH, 'python26.txt'), 'r')
 		msg = fp.read()
 		fp.close()
-		msg += 'Version: {0}\nPlatform: {1}\nArch: {2}\nPath: {3}\nEncoding: {4}\nWhich method works for you: '.format(
+		msg += 'Version: {0}\nPlatform: {1}\nArch: {2}\nPath: {3}\nEncoding: {4}\n'.format(
 			sublime.version(), sublime.platform(), sublime.arch(), sys.path, encoding
 		)
 		self.view.insert(edit, 0, msg)
@@ -454,7 +456,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			return
 		command = view.command_history(0)
 		command1 = view.command_history(1)
-		if command == (None, None, 0):
+		if command == NONE_COMMAND:
 			if command1[0] == 'convert_to_utf8':
 				view.run_command('redo')
 		elif command[0] == 'convert_to_utf8':
@@ -462,7 +464,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 				if stamps[file_name] == command[1].get('stamp'):
 					view.set_scratch(True)
 		elif command[0] == 'revert':
-			if command1 == (None, None, 0):
+			if command1 == NONE_COMMAND:
 				# on_modified will be invoked twice for each revert
 				if file_name not in REVERTING_FILES:
 					REVERTING_FILES.insert(0, file_name)

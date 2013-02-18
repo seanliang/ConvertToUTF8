@@ -9,7 +9,13 @@ I'm working on making ConvertToUTF8 support both Sublime Text 2 and 3 currently.
 [![Buy me a cup of coffee via PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=GP6Y25N7Q9E26&lc=US&item_name=Buy%20me%20a%20cup%20of%20coffee&item_number=ConvertToUTF8&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
 [![Buy me a cup of coffee via Alipay](http://dl.dropbox.com/u/31937639/alipay.png)](https://me.alipay.com/seanliang)
 
-** Please NOTE: Sublime Text 3 is still in its very early beta period, and [it lacks an API which ConvertToUTF8 depends on](http://www.sublimetext.com/forum/viewtopic.php?f=6&t=10892). ConvertToUTF8 might not work fully until this problem is resolved.
+Note
+------------------
+** For Linux users: ConvertToUTF8 relies on several dynamic libraries which are missing in embedded version of Python of Sublime Text 2 and 3. This plugin can not work fully until you install them manully.
+
+** For OS X users: Sublime Text 3 uses an embedded Python which is facing the same problem as Linux version.
+
+** I've reported this problem to Jon but did not get any response yet, so I will create extra plugins to solve it. If you are eager to use this plugin before they are released, please contact me for more information.
 
 Installation
 ------------------
@@ -52,14 +58,7 @@ Q & A
   A: Please try the following steps:
   1. Restart Sublime Text
   2. Make sure the plug-in folder is named "ConvertToUTF8" (skip this step if you install via "Package Control")
-  3. If you running Ubuntu 64bit, you can install [Codecs26](https://github.com/seanliang/Codecs26) plugin. If it doesn't work, you have to install Python 2.6 manually:
-<code>  
-sudo add-apt-repository ppa:fkrull/deadsnakes  
-sudo apt-get update  
-sudo apt-get install python2.6  
-sudo ln -s /usr/lib/python2.6 /[PATH_TO_ST2]/lib  
-</code>
-** Note: PATH_TO_ST2 means the installation location of Sublime Text 2 **
+  3. See [Note section above](#note)
   4. Disable other encoding related plug-ins
   5. Contact me
 

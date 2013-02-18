@@ -9,7 +9,13 @@
 [![通过支付宝请我](http://dl.dropbox.com/u/31937639/alipay.png)](https://me.alipay.com/seanliang)
 [![通过PayPal请我](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=GP6Y25N7Q9E26&lc=US&item_name=Buy%20me%20a%20cup%20of%20coffee&item_number=ConvertToUTF8&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
 
-** 请注意：Sublime Text 3 尚处于非常早期的测试期，[目前缺少一个 ConvertToUTF8 依赖的 API](http://www.sublimetext.com/forum/viewtopic.php?f=6&t=10892)。在这个问题未解决之前，ConvertToUTF8 可能无法完全运作。
+注意
+------------------
+** Linux 用户：Sublime Text 2 和 3 内嵌 Python 版本中缺失几个 ConvertToUTF8 依赖的动态库。您必须手工安装这些文件才能让本插件完全运作。
+
+** OS X 用户：Sublime Text 3 使用的内嵌 Python 存在与 Linux 版本相同的问题。
+
+** 我已将此问题报告给 Jon 但未收到任何回复，因此我将创建额外的插件来解决它。如果您急于在发布之前使用本插件，请与我联系获取更多信息。
 
 安装
 ------------------
@@ -52,14 +58,7 @@
   答：请尝试以下步骤：
   1. 重启 Sublime Text
   2. 请确认插件目录名为 ConvertToUTF8（如果是通过 Package Control 安装的可略过此步骤）
-  3. 如果您的系统是64位 Ubuntu，请安装 [Codecs26](https://github.com/seanliang/Codecs26) 插件。如果还不行，请手工安装 Python 2.6
-<code>  
-sudo add-apt-repository ppa:fkrull/deadsnakes  
-sudo apt-get update  
-sudo apt-get install python2.6  
-sudo ln -s /usr/lib/python2.6 /[PATH_TO_ST2]/lib  
-</code>
-** 注意：PATH_TO_ST2 是指 Sublime Text 2 的安装目录 **
+  3. 参见[上述“注意”条目](#注意)
   4. 禁用其他编码相关的插件
   5. 联系我
 
