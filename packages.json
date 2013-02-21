@@ -17,12 +17,18 @@
 			}
 		}, {
 			"name": "Codecs26",
-			"description": "Library files missing in the embedded Python of Sublime Text 2",
+			"description": "CJK library files missing in the embedded Python of Sublime Text 2",
 			"author": "Sean Liang",
 			"homepage": "https://github.com/seanliang/Codecs26",
-			"last_modified": "2013-02-04 19:30:00",
+			"last_modified": "2013-02-21 23:30:00",
 			"platforms": {
-				"linux": [
+				"linux-x32": [
+					{
+						"version": "1.0.0",
+						"url": "https://nodeload.github.com/seanliang/Codecs26/zipball/x32"
+					}
+				],
+				"linux-x64": [
 					{
 						"version": "1.0.0",
 						"url": "https://nodeload.github.com/seanliang/Codecs26/zipball/master"
@@ -30,8 +36,28 @@
 				]
 			}
 		}, {
+			"name": "Codecs33",
+			"description": "CJK library files missing in the embedded Python of Sublime Text 3",
+			"author": "Sean Liang",
+			"homepage": "https://github.com/seanliang/Codecs33",
+			"last_modified": "2013-02-21 23:30:00",
+			"platforms": {
+				"linux-x64": [
+					{
+						"version": "1.0.0",
+						"url": "https://nodeload.github.com/seanliang/Codecs33/zipball/linux-x64"
+					}
+				],
+				"osx": [
+					{
+						"version": "1.0.0",
+						"url": "https://nodeload.github.com/seanliang/Codecs33/zipball/osx"
+					}
+				]
+			}
+		}, {
 			"name": "JavaPropertiesEditor",
-			"description": "Sublime Text 2 plugin for editing Java properties files in native languages",
+			"description": "Sublime Text 2 & 3 plugin for editing Java properties files in native languages",
 			"author": "Sean Liang",
 			"homepage": "https://github.com/seanliang/JavaPropertiesEditor",
 			"last_modified": "2013-02-18 22:45:00",
