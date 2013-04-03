@@ -40,17 +40,23 @@
 			"description": "CJK library files missing in the embedded Python of Sublime Text 3",
 			"author": "Sean Liang",
 			"homepage": "https://github.com/seanliang/Codecs33",
-			"last_modified": "2013-02-21 23:30:00",
+			"last_modified": "2013-04-03 17:00:00",
 			"platforms": {
+				"linux-x32": [
+					{
+						"version": "1.0.1",
+						"url": "https://nodeload.github.com/seanliang/Codecs33/zipball/linux-x32"
+					}
+				],
 				"linux-x64": [
 					{
-						"version": "1.0.0",
+						"version": "1.0.1",
 						"url": "https://nodeload.github.com/seanliang/Codecs33/zipball/linux-x64"
 					}
 				],
 				"osx": [
 					{
-						"version": "1.0.0",
+						"version": "1.0.1",
 						"url": "https://nodeload.github.com/seanliang/Codecs33/zipball/osx"
 					}
 				]
