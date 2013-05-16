@@ -16,7 +16,21 @@
 					{ "caption": "-" },
 					{ "caption": "UTF-8", "command": "convert_to_utf8", "args": {"encoding": "UTF-8", "stamp": "0" } }
 				]
-			}
+			},
+            {
+                "caption": "Reload with Encoding",
+                "children": 
+                [
+                    { "caption": "Chinese Simplified (GBK)", "command": "reload_with_encoding", "args": {"encoding": "GBK"} },
+                    { "caption": "Chinese Traditional (BIG5)", "command": "reload_with_encoding", "args": {"encoding": "BIG5-HKSCS"} },
+                    { "caption": "Korean (EUC-KR)", "command": "reload_with_encoding", "args": {"encoding": "EUC-KR"} },
+                    { "caption": "Japanese (CP932)", "command": "reload_with_encoding", "args": {"encoding": "CP932"} },
+                    { "caption": "Japanese (Shift_JIS)", "command": "reload_with_encoding", "args": {"encoding": "Shift_JIS"} },
+                    { "caption": "Japanese (EUC-JP)", "command": "reload_with_encoding", "args": {"encoding": "EUC-JP"} },
+                    { "caption": "-" },
+                    { "caption": "UTF-8", "command": "reload_with_encoding", "args": {"encoding": "UTF-8"} }
+                ]
+            }
 		]
 	}
 ]
