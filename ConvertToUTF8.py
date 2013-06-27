@@ -332,7 +332,7 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 			contents = codecs.EncodedFile(fp, encoding, 'UTF-8').read()
 		except (LookupError, UnicodeEncodeError) as e:
 			sublime.error_message(u'Can not convert file encoding of {0} to {1}, it was saved as UTF-8 instead:\n\n{2}'.format
-					(os.path.basename(file_name), encoding, e.message))
+					(os.path.basename(file_name), encoding, e))
 			return
 		finally:
 			if fp:
