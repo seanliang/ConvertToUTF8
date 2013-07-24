@@ -1,0 +1,10 @@
+ConvertToUTF8 1.2.2 Changelog
+
+New Features
+- Added "Reload with Encoding" menu items and command (Thanks to @ArieShout)
+
+Enhancements
+- [ST3] Perform detection for file(s) opened before plugin is ready
+
+Fixed
+- [ST3] File remains in dirty after being saved

@@ -9,6 +9,7 @@ if sys.version_info < (3, 0):
 else:
 	from .chardet.universaldetector import UniversalDetector
 	NONE_COMMAND = ('', None, 0)
+	ST3 = True
 import codecs
 import threading
 import json
@@ -23,8 +24,6 @@ CONFIRM_IS_AVAILABLE = ('ok_cancel_dialog' in dir(sublime))
 
 ENCODINGS_NAME = []
 ENCODINGS_CODE = []
-
-PKG_PATH = None
 
 class EncodingCache(object):
 	def __init__(self):
@@ -108,20 +107,28 @@ def get_settings():
 	SETTINGS['convert_on_save'] = settings.get('convert_on_save', 'always')
 
 def init_settings():
-	global encoding_cache, PKG_PATH
+	global encoding_cache
 	encoding_cache = EncodingCache()
-	PKG_PATH = os.path.join(sublime.packages_path(), 'ConvertToUTF8')
 	get_settings()
 	sublime.load_settings('ConvertToUTF8.sublime-settings').add_on_change('get_settings', get_settings)
 
 if 'sublime_api' in dir(sublime):
 	def plugin_loaded():
 		init_settings()
+		if SETTINGS['convert_on_load'] == 'never':
+			return
+		# existing views should be checked
+		for win in sublime.windows():
+			for view in win.views():
+				if view.is_dirty() or view.settings().get('origin_encoding'):
+					show_encoding_status(view)
+					continue
+				threading.Thread(target=lambda: detect(view, view.file_name(), view.encoding())).start()
 else:
 	init_settings()
 
 def detect(view, file_name, encoding):
-	if not os.path.exists(file_name):
+	if not file_name or not os.path.exists(file_name):
 		return
 	if not encoding.endswith(' with BOM'):
 		encoding = encoding_cache.pop(file_name)
@@ -170,6 +177,8 @@ def show_encoding_status(view):
 	encoding = view.settings().get('force_encoding')
 	if not encoding:
 		encoding = view.settings().get('origin_encoding')
+		if not encoding:
+			return
 	view.set_status('origin_encoding', encoding)
 
 def init_encoding_vars(view, encoding, run_convert=True, stamp=None, detect_on_fail=False):
@@ -252,10 +261,7 @@ class PyInstructionCommand(sublime_plugin.TextCommand):
 		self.view.set_name('ConvertToUTF8 Instructions')
 		self.view.set_scratch(True)
 		self.view.settings().set("word_wrap", True)
-		fp = open(os.path.join(PKG_PATH, 'python26.txt'), 'r')
-		msg = fp.read()
-		fp.close()
-		msg += 'Version: {0}\nPlatform: {1}\nArch: {2}\nPath: {3}\nEncoding: {4}\n'.format(
+		msg = 'Due to the limitation of embedded Python with Sublime Text, ConvertToUTF8 might not work properly.\n\nYou have to install an extra plugin to solve this problem, please kindly send the debug information to sunlxy#yahoo.com to get it:\n====== Debug Information ======\nVersion: {0}\nPlatform: {1}\nArch: {2}\nPath: {3}\nEncoding: {4}\n'.format(
 			sublime.version(), sublime.platform(), sublime.arch(), sys.path, encoding
 		)
 		self.view.insert(edit, 0, msg)
@@ -504,10 +510,12 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 	def undo_me(self, view):
 		view.settings().erase('prevent_detect')
 		view.run_command('undo')
-		if view.settings().get('revert_to_scratch'):
+		# st3 will reload file immediately
+		if view.settings().get('revert_to_scratch') or ST3:
 			view.set_scratch(True)
 
 	def on_deactivated(self, view):
+		# st2 will reload file when on_deactivated
 		if view.settings().get('prevent_detect'):
 			remove_reverting(view.file_name())
 			view.settings().set('revert_to_scratch', not view.is_dirty())

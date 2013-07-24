@@ -1,4 +1,0 @@
-Due to the limitation of embedded Python with Sublime Text, ConvertToUTF8 might not work properly.
-
-You have to install an extra plugin to solve this problem, please kindly send the debug information to sunlxy#yahoo.com to get it:
-====== Debug Information ======
