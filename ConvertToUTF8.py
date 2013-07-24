@@ -222,7 +222,30 @@ class EncodingSelection(threading.Thread):
 def show_selection(view):
 	EncodingSelection(view).start()
 
+class ReloadWithEncoding(threading.Thread):
+    def __init__(self, view, encoding):
+        threading.Thread.__init__(self)
+        self.view = view
+        self.encoding = encoding
+
+    def run(self):
+        sublime.set_timeout(self.reload, 0)
+
+    def reload(self):
+        init_encoding_vars(self.view, self.encoding)
+
+def reload_encoding(view, encoding):
+    ReloadWithEncoding(view, encoding).start()
+
 stamps = {}
+
+class ShowEncodingSelectionCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        show_selection(self.view)
+
+class ReloadWithEncodingCommand(sublime_plugin.TextCommand):
+    def run(self, edit, encoding):
+        reload_encoding(self.view, encoding)
 
 class PyInstructionCommand(sublime_plugin.TextCommand):
 	def run(self, edit, encoding):

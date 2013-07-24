@@ -1,0 +1,6 @@
+[
+    {
+        "caption": "ConvertToUTF8: Reload with Encoding",
+        "command": "show_encoding_selection"
+    }
+]
