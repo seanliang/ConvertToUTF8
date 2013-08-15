@@ -1,80 +1,45 @@
 {
-	"schema_version": "1.2",
+	"schema_version": "2.0",
 	"packages": [
 		{
-			"name": "ConvertToUTF8",
-			"description": "For editing and saving files encoded in GBK, BIG5, EUC-KR, EUC-JP, Shift_JIS, etc.",
-			"author": "Sean Liang",
-			"homepage": "https://github.com/seanliang/ConvertToUTF8",
-			"last_modified": "2013-07-24 22:30:00",
-			"platforms": {
-				"*": [
-					{
-						"version": "1.2.2",
-						"url": "https://nodeload.github.com/seanliang/ConvertToUTF8/zipball/master"
-					}
-				]
-			}
+			"details": "https://github.com/seanliang/ConvertToUTF8",
+			"releases": [
+				{
+					"details": "https://github.com/seanliang/ConvertToUTF8/tags"
+				}
+			]
 		}, {
-			"name": "Codecs26",
-			"description": "CJK library files missing in the embedded Python of Sublime Text 2",
-			"author": "Sean Liang",
-			"homepage": "https://github.com/seanliang/Codecs26",
-			"last_modified": "2013-02-21 23:30:00",
-			"platforms": {
-				"linux-x32": [
-					{
-						"version": "1.0.0",
-						"url": "https://nodeload.github.com/seanliang/Codecs26/zipball/x32"
-					}
-				],
-				"linux-x64": [
-					{
-						"version": "1.0.0",
-						"url": "https://nodeload.github.com/seanliang/Codecs26/zipball/master"
-					}
-				]
-			}
+			"details": "https://github.com/seanliang/Codecs26",
+			"releases": [
+				{
+					"platforms": ["linux-x32"],
+					"details": "https://github.com/seanliang/Codecs26/tree/x32"
+				}, {
+					"platforms": ["linux-x64"],
+					"details": "https://github.com/seanliang/Codecs26/tree/master"
+				}
+			]
 		}, {
-			"name": "Codecs33",
-			"description": "CJK library files missing in the embedded Python of Sublime Text 3",
-			"author": "Sean Liang",
-			"homepage": "https://github.com/seanliang/Codecs33",
-			"last_modified": "2013-04-03 17:00:00",
-			"platforms": {
-				"linux-x32": [
-					{
-						"version": "1.0.1",
-						"url": "https://nodeload.github.com/seanliang/Codecs33/zipball/linux-x32"
-					}
-				],
-				"linux-x64": [
-					{
-						"version": "1.0.1",
-						"url": "https://nodeload.github.com/seanliang/Codecs33/zipball/linux-x64"
-					}
-				],
-				"osx": [
-					{
-						"version": "1.0.1",
-						"url": "https://nodeload.github.com/seanliang/Codecs33/zipball/osx"
-					}
-				]
-			}
+			"details": "https://github.com/seanliang/Codecs33",
+			"releases": [
+				{
+					"platforms": ["linux-x32"],
+					"details": "https://github.com/seanliang/Codecs33/tree/linux-x32"
+				}, {
+					"platforms": ["linux-x64"],
+					"details": "https://github.com/seanliang/Codecs33/tree/linux-x64"
+				}, {
+					"platforms": ["osx"],
+					"details": "https://github.com/seanliang/Codecs33/tree/osx"
+				}
+			]
 		}, {
-			"name": "JavaPropertiesEditor",
-			"description": "Sublime Text 2 & 3 plugin for editing Java properties files in native languages",
-			"author": "Sean Liang",
-			"homepage": "https://github.com/seanliang/JavaPropertiesEditor",
-			"last_modified": "2013-02-18 22:45:00",
-			"platforms": {
-				"*": [
-					{
-						"version": "1.1.0",
-						"url": "https://nodeload.github.com/seanliang/JavaPropertiesEditor/zipball/master"
-					}
-				]
-			}
+			"details": "https://github.com/seanliang/JavaPropertiesEditor",
+			"releases": [
+				{
+					"details": "https://github.com/seanliang/JavaPropertiesEditor/tags"
+				}
+			]
 		}
 	]
 }
