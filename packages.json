@@ -12,9 +12,11 @@
 			"details": "https://github.com/seanliang/Codecs26",
 			"releases": [
 				{
+					"sublime_text": "<3000",
 					"platforms": ["linux-x32"],
 					"details": "https://github.com/seanliang/Codecs26/tree/x32"
 				}, {
+					"sublime_text": "<3000",
 					"platforms": ["linux-x64"],
 					"details": "https://github.com/seanliang/Codecs26/tree/master"
 				}
@@ -23,12 +25,15 @@
 			"details": "https://github.com/seanliang/Codecs33",
 			"releases": [
 				{
+					"sublime_text": ">2999",
 					"platforms": ["linux-x32"],
 					"details": "https://github.com/seanliang/Codecs33/tree/linux-x32"
 				}, {
+					"sublime_text": ">2999",
 					"platforms": ["linux-x64"],
 					"details": "https://github.com/seanliang/Codecs33/tree/linux-x64"
 				}, {
+					"sublime_text": ">2999",
 					"platforms": ["osx"],
 					"details": "https://github.com/seanliang/Codecs33/tree/osx"
 				}

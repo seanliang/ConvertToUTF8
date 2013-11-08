@@ -1,0 +1,9 @@
+ConvertToUTF8 1.2.3 Changelog
+
+New Features
+- Added "lazy_reload" setting. File will be saved to a temporary location and be reloaded when its view loses focus.
+
+Enhancements
+- Better instruction for extra plugin
+
+** When force a file to be decoded with a specific encoding, malformed data which can not be decoded will be ignored instead of being replaced by a marker

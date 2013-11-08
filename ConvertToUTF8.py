@@ -6,6 +6,7 @@ import os
 if sys.version_info < (3, 0):
 	from chardet.universaldetector import UniversalDetector
 	NONE_COMMAND = (None, None, 0)
+	ST3 = False
 else:
 	from .chardet.universaldetector import UniversalDetector
 	NONE_COMMAND = ('', None, 0)
@@ -14,6 +15,8 @@ import codecs
 import threading
 import json
 import time
+import hashlib
+import shutil
 
 SKIP_ENCODINGS = ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE')
 
@@ -27,8 +30,8 @@ ENCODINGS_CODE = []
 
 class EncodingCache(object):
 	def __init__(self):
-		self.cache_file = os.path.join(sublime.packages_path(), 'User', 'encoding_cache.json')
-		self.encoding_cache = []
+		self.file = os.path.join(sublime.packages_path(), 'User', 'encoding_cache.json')
+		self.cache = []
 		self.max_size = -1
 		self.dirty = False
 		self.load()
@@ -42,42 +45,42 @@ class EncodingCache(object):
 	def shrink(self):
 		if self.max_size < 0:
 			return
-		if len(self.encoding_cache) > self.max_size:
+		if len(self.cache) > self.max_size:
 			self.dirty = True
-			del self.encoding_cache[self.max_size:]
+			del self.cache[self.max_size:]
 
 	def set_max_size(self, max_size):
 		self.max_size = max_size
 		self.shrink()
 
 	def load(self):
-		if not os.path.exists(self.cache_file):
+		if not os.path.exists(self.file):
 			return
-		fp = open(self.cache_file, 'r')
-		self.encoding_cache = json.load(fp)
+		fp = open(self.file, 'r')
+		self.cache = json.load(fp)
 		fp.close()
-		if len(self.encoding_cache) > 0:
-			if 'file' in self.encoding_cache[0]:
+		if len(self.cache) > 0:
+			if 'file' in self.cache[0]:
 				# old style cache
 				new_cache = []
-				for item in self.encoding_cache:
+				for item in self.cache:
 					new_cache.append({
 						item['file']: item['encoding']
 					})
-				self.encoding_cache = new_cache
+				self.cache = new_cache
 				self.dirty = True
 
 	def save(self):
 		self.shrink()
-		fp = open(self.cache_file, 'w')
-		json.dump(self.encoding_cache, fp)
+		fp = open(self.file, 'w')
+		json.dump(self.cache, fp)
 		fp.close()
 		self.dirty = False
 
 	def pop(self, file_name):
-		for item in self.encoding_cache:
+		for item in self.cache:
 			if file_name in item:
-				self.encoding_cache.remove(item)
+				self.cache.remove(item)
 				self.dirty = True
 				return item.get(file_name)
 		return None
@@ -86,7 +89,7 @@ class EncodingCache(object):
 		if self.max_size < 1:
 			return
 		self.pop(file_name)
-		self.encoding_cache.insert(0, {
+		self.cache.insert(0, {
 			file_name: encoding
 		})
 		self.dirty = True
@@ -105,27 +108,74 @@ def get_settings():
 	SETTINGS['default_encoding_on_create'] = settings.get('default_encoding_on_create', '')
 	SETTINGS['convert_on_load'] = settings.get('convert_on_load', 'always')
 	SETTINGS['convert_on_save'] = settings.get('convert_on_save', 'always')
+	SETTINGS['lazy_reload'] = settings.get('lazy_reload', True)
+
+TMP_DIR = None
+
+def get_temp_name(name):
+	if not name:
+		return None
+	name = name.encode('UTF-8')
+	return hashlib.md5(name).hexdigest()
+
+def clean_temp_folder():
+	tmp_files = os.listdir(TMP_DIR)
+	for win in sublime.windows():
+		for view in win.views():
+			file_name = view.file_name()
+			tmp_name = get_temp_name(file_name)
+			if tmp_name in tmp_files:
+				if not view.is_dirty():
+					tmp_file = os.path.join(TMP_DIR, tmp_name)
+					# check mtime
+					mtime1 = os.path.getmtime(file_name)
+					mtime2 = os.path.getmtime(tmp_file)
+					if mtime1 != mtime2:
+						# file was changed outside
+						view.settings().erase('prevent_detect')
+						continue
+					shutil.move(tmp_file, file_name)
+				tmp_files.remove(tmp_name)
+	for tmp_name in tmp_files:
+		tmp_file = os.path.join(TMP_DIR, tmp_name)
+		os.unlink(tmp_file)
 
 def init_settings():
-	global encoding_cache
+	global encoding_cache, TMP_DIR
 	encoding_cache = EncodingCache()
 	get_settings()
 	sublime.load_settings('ConvertToUTF8.sublime-settings').add_on_change('get_settings', get_settings)
+	TMP_DIR = os.path.join(sublime.packages_path(), 'User', 'c2u_tmp')
+	if not os.path.exists(TMP_DIR):
+		os.mkdir(TMP_DIR)
 
-if 'sublime_api' in dir(sublime):
-	def plugin_loaded():
-		init_settings()
-		if SETTINGS['convert_on_load'] == 'never':
-			return
-		# existing views should be checked
-		for win in sublime.windows():
-			for view in win.views():
-				if view.is_dirty() or view.settings().get('origin_encoding'):
-					show_encoding_status(view)
-					continue
-				threading.Thread(target=lambda: detect(view, view.file_name(), view.encoding())).start()
-else:
+def setup_views():
+	clean_temp_folder()
+	if SETTINGS['convert_on_load'] == 'never':
+		return
+	# existing views should be checked
+	for win in sublime.windows():
+		for view in win.views():
+			if view.is_dirty() or view.settings().get('origin_encoding'):
+				show_encoding_status(view)
+				continue
+			file_name = view.file_name()
+			encoding = view.encoding()
+			threading.Thread(target=lambda: detect(view, file_name, encoding)).start()
+
+def plugin_loaded():
 	init_settings()
+	setup_views()
+
+def wait_for_ready():
+	if sublime.windows():
+		setup_views()
+	else:
+		sublime.set_timeout(wait_for_ready, 100)
+
+if not ST3:
+	init_settings()
+	wait_for_ready()
 
 def detect(view, file_name, encoding):
 	if not file_name or not os.path.exists(file_name):
@@ -257,14 +307,33 @@ class ReloadWithEncodingCommand(sublime_plugin.TextCommand):
         reload_encoding(self.view, encoding)
 
 class PyInstructionCommand(sublime_plugin.TextCommand):
-	def run(self, edit, encoding):
+	def get_branch(self, platform, arch):
+		return [{
+			'linux-x64': 'master',
+			'linux-x32': 'x32',
+		}, {
+			'linux-x64': 'linux-x64',
+			'linux-x32': 'linux-x32',
+			'osx-x64': 'osx',
+		}][ST3].get(platform + '-' + arch)
+
+	def run(self, edit, encoding, file_name):
 		self.view.set_name('ConvertToUTF8 Instructions')
 		self.view.set_scratch(True)
 		self.view.settings().set("word_wrap", True)
-		msg = 'Due to the limitation of embedded Python with Sublime Text, ConvertToUTF8 might not work properly.\n\nYou have to install an extra plugin to solve this problem, please kindly send the debug information to sunlxy#yahoo.com to get it:\n====== Debug Information ======\nVersion: {0}\nPlatform: {1}\nArch: {2}\nPath: {3}\nEncoding: {4}\n'.format(
-			sublime.version(), sublime.platform(), sublime.arch(), sys.path, encoding
+		msg = 'Oops! The file {0} is detected as {1} which is not supported by your Sublime Text.\n\nPlease check whether it is in the list of Python\'s Standard Encodings (http://docs.python.org/library/codecs.html#standard-encodings) or not.\n\nIf yes, '.format(file_name, encoding)
+		branch = self.get_branch(sublime.platform(), sublime.arch())
+		if branch:
+			ver = '33' if ST3 else '26'
+			msg = msg + 'please install Codecs{0} (https://github.com/seanliang/Codecs{0}/tree/{1}) and restart Sublime Text to make ConvertToUTF8 work properly. If it is still not working, '.format(ver, branch)
+
+		import platform
+		msg = msg + 'please kindly send the following information to sunlxy#yahoo.com:\n====== Debug Information ======\nVersion: {0}-{1}\nPlatform: {2}\nPath: {3}\nEncoding: {4}\n'.format(
+			sublime.version(), sublime.arch(), platform.platform(), sys.path, encoding
 		)
 		self.view.insert(edit, 0, msg)
+		self.view.set_read_only(True)
+		self.view.window().focus_view(self.view)
 
 class ConvertToUtf8Command(sublime_plugin.TextCommand):
 	def run(self, edit, encoding=None, stamp=None, detect_on_fail=False):
@@ -295,8 +364,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 			contents = fp.read()
 		except LookupError as e:
 			clean_encoding_vars(view)
-			sublime.error_message('Encoding {0} is not supported.'.format(encoding))
-			view.window().new_file().run_command('py_instruction', {'encoding': encoding})
+			view.window().new_file().run_command('py_instruction', {'encoding': encoding, 'file_name': file_name})
 			return
 		except UnicodeDecodeError as e:
 			if detect_on_fail:
@@ -304,11 +372,11 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 				return
 			if CONFIRM_IS_AVAILABLE:
 				if sublime.ok_cancel_dialog(u'Errors occurred while converting {0} with {1} encoding.\n\n'
-						'Continue to load this file using {1} (malformed data will be replaced by a marker)?'
+						'WARNING: Continue to load this file using {1}, malformed data will be ignored.'
 						'\n\nPress "Cancel" to choose another encoding manually.'.format
 						(os.path.basename(file_name), encoding)):
 					fp.close()
-					fp = codecs.open(file_name, 'rb', encoding, errors='replace')
+					fp = codecs.open(file_name, 'rb', encoding, errors='ignore')
 					contents = fp.read()
 				else:
 					show_selection(view)
@@ -366,9 +434,18 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		finally:
 			if fp:
 				fp.close()
-		fp = open(file_name, 'wb')
+		# write content to temporary file
+		tmp_name = os.path.join(TMP_DIR, get_temp_name(file_name))
+		fp = open(tmp_name, 'wb')
 		fp.write(contents)
 		fp.close()
+		if not SETTINGS['lazy_reload']:
+			# os.rename has "Invalid cross-device link" issue
+			shutil.move(tmp_name, file_name)
+		else:
+			# copy the timestamp from original file
+			mtime = os.path.getmtime(file_name)
+			os.utime(tmp_name, (mtime, mtime))
 		encoding_cache.set(file_name, encoding)
 		view.settings().set('prevent_detect', True)
 		sublime.status_message('UTF8 -> {0}'.format(encoding))
@@ -391,7 +468,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		return False
 
 	def on_new(self, view):
-		if SETTINGS['default_encoding_on_create']:
+		if SETTINGS.get('default_encoding_on_create'):
 			init_encoding_vars(view, SETTINGS['default_encoding_on_create'], False)
 
 	def on_clone(self, view):
@@ -511,14 +588,19 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		view.settings().erase('prevent_detect')
 		view.run_command('undo')
 		# st3 will reload file immediately
-		if view.settings().get('revert_to_scratch') or ST3:
+		if view.settings().get('revert_to_scratch') or (ST3 and not SETTINGS['lazy_reload']):
 			view.set_scratch(True)
 
 	def on_deactivated(self, view):
 		# st2 will reload file when on_deactivated
 		if view.settings().get('prevent_detect'):
-			remove_reverting(view.file_name())
+			file_name = view.file_name()
+			if SETTINGS['lazy_reload']:
+				tmp_name = os.path.join(TMP_DIR, get_temp_name(file_name))
+				shutil.move(tmp_name, file_name)
+			remove_reverting(file_name)
 			view.settings().set('revert_to_scratch', not view.is_dirty())
+			# make ST stop asking about reloading
 			view.run_command('revert')
 
 	def on_pre_save(self, view):
