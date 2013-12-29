@@ -38,7 +38,7 @@
 * default_encoding_on_create：指定新建文件的默认编码（如 GBK），空值表示使用 Sublime Text 的 default_encoding 设置（默认为空值）
 * convert_on_load：启用/禁用文件装载时将窗口内容转换成UTF-8编码，可选项：always 自动转换，never 不转换（默认为 always）
 * convert_on_save：启用/禁用文件保存时将其从UTF-8转换成指定转码，可选项：always 自动转换，never 不转换（默认为 always）
-* lazy_reload：启用/禁用将文件保存到临时位置，并在切换窗口或标签时在后台自动重载，可选项：true，false（默认为 true）
+* lazy_reload：启用/禁用将文件保存到临时位置，并在切换窗口或标签时在后台自动重载，可选项：true，false（默认为 false）
 
 使用说明
 ------------------
@@ -66,7 +66,7 @@
 
 * 问：这个插件支持哪些编码？
 
-  答：所有 [Python 支持的编码](http://docs.python.org/library/codecs.html#standard-encodings) 应该都可使用。
+  答：所有 [Python 支持的编码](http://docs.python.org/library/codecs.html#standard-encodings) 都可以，其他编码如 EUC-TW 将不被支持。
 
 * 问：为何有时重新激活窗口，里面的内容会变乱码？
 

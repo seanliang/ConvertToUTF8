@@ -1,0 +1,5 @@
+ConvertToUTF8 1.2.4 Changelog
+
+Enhancements
+- Default value of "lazy_reload" option is changed to false
+- If detected encoding is not suitable, its superset will be used

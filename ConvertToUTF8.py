@@ -19,6 +19,12 @@ import hashlib
 import shutil
 
 SKIP_ENCODINGS = ('ASCII', 'UTF-8', 'UTF-16LE', 'UTF-16BE')
+SUPERSETS = {
+	'GB2312': 'GBK',
+	'GBK': 'GB18030',
+	'BIG5': 'CP950', # CP950 is common in Taiwan
+	'CP950': 'BIG5-HKSCS' # HK official Big5 variant
+}
 
 SETTINGS = {}
 REVERTING_FILES = []
@@ -201,10 +207,6 @@ def detect(view, file_name, encoding):
 	encoding = detector.result['encoding']
 	if encoding:
 		encoding = encoding.upper()
-		if encoding == 'BIG5':
-			encoding = 'BIG5-HKSCS'
-		elif encoding == 'GB2312':
-			encoding = 'GBK'
 	confidence = detector.result['confidence']
 	sublime.set_timeout(lambda: check_encoding(view, encoding, confidence), 0)
 
@@ -213,11 +215,11 @@ def check_encoding(view, encoding, confidence):
 	if not encoding or confidence < 0.95:
 		view_encoding = view.encoding()
 		if view_encoding == view.settings().get('fallback_encoding'):
-			# show error only when the ST2 can't detect the encoding either
+			# show error only when the ST can't detect the encoding either
 			show_selection(view)
 			return
 		else:
-			# using encoding detected by ST2
+			# using encoding detected by ST
 			if view_encoding == 'Undefined':
 				view_encoding = 'ASCII'
 			encoding = view_encoding
@@ -341,7 +343,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		if encoding:
 			view.settings().set('force_encoding', encoding)
 			origin_encoding = view.settings().get('origin_encoding')
-			# convert only when ST2 can't load file properly
+			# convert only when ST can't load file properly
 			run_convert = (view.encoding() == view.settings().get('fallback_encoding'))
 			if origin_encoding:
 				if origin_encoding == encoding:
@@ -369,6 +371,11 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		except UnicodeDecodeError as e:
 			if detect_on_fail:
 				detect(view, file_name, view.encoding())
+				return
+			superset = SUPERSETS.get(encoding)
+			if superset:
+				print('Try encoding {0} instead of {1}.'.format(superset, encoding))
+				init_encoding_vars(view, superset, True, stamp)
 				return
 			if CONFIRM_IS_AVAILABLE:
 				if sublime.ok_cancel_dialog(u'Errors occurred while converting {0} with {1} encoding.\n\n'

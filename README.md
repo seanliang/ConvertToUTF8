@@ -38,7 +38,7 @@ Please check ConvertToUTF8.sublime-settings file for details. You should save yo
 * default_encoding_on_create: specific the default encoding for newly created file (such as "GBK"), empty value means using sublime text's "default_encoding" setting (default: empty)
 * convert_on_load: enable/disable convert file content to UTF-8 when it is loaded, available options: always, never (default: always)
 * convert_on_save: enable/disable convert file from UTF-8 to a specific encoding when it is saved, available options: always, never (default: always)
-* lazy_reload: enable/disable save file to a temporary location, and reload it in background when switching to other windows or tabs, available options: true, false (default: true)
+* lazy_reload: enable/disable save file to a temporary location, and reload it in background when switching to other windows or tabs, available options: true, false (default: false)
 
 Usage
 ------------------
@@ -66,7 +66,7 @@ Q & A
 
 * Q: Which encodings are supported?
 
-  A: Any [encoding supported by Python](http://docs.python.org/library/codecs.html#standard-encodings) should be fine.
+  A: Any [encoding supported by Python](http://docs.python.org/library/codecs.html#standard-encodings) will be fine, other encodings like EUC-TW will not be supported.
 
 * Q: Why does the content become a mess when the window is re-activated?
 

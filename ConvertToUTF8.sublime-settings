@@ -2,7 +2,7 @@
 	// supported encoding list, name & code in pair
 	"encoding_list" : [
 		["Chinese Simplified (GBK)", "GBK"],
-		["Chinese Traditional (BIG5)", "BIG5-HKSCS"],
+		["Chinese Traditional (BIG5)", "BIG5"],
 		["Korean (EUC-KR)", "EUC-KR"],
 		["Japanese (CP932)", "CP932"],
 		["Japanese (Shift_JIS)", "Shift_JIS"],
@@ -22,8 +22,8 @@
 	// Encoding for new file, empty means using sublime text's "default_encoding" setting
 	"default_encoding_on_create" : "",
 
-	// If you always close window immediately after saving files, set this option to false
-	"lazy_reload": true,
+	// Set this option to true will cause Sublime Text reload the saved file when losing focus
+	"lazy_reload": false,
 
 	// Convert encoding options when loading/saving: always, never
 	"convert_on_load" : "always",
