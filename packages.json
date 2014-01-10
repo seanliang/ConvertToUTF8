@@ -5,6 +5,7 @@
 			"details": "https://github.com/seanliang/ConvertToUTF8",
 			"releases": [
 				{
+					"sublime_text": "*",
 					"details": "https://github.com/seanliang/ConvertToUTF8/tags"
 				}
 			]
@@ -42,6 +43,7 @@
 			"details": "https://github.com/seanliang/JavaPropertiesEditor",
 			"releases": [
 				{
+					"sublime_text": "*",
 					"details": "https://github.com/seanliang/JavaPropertiesEditor/tags"
 				}
 			]
