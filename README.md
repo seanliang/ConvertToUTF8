@@ -29,7 +29,7 @@ Your folder hierarchy should look like this:
 
 Configuration
 ------------------
-Please check ConvertToUTF8.sublime-settings file for details. You should save your personal settings in a file named "ConvertToUTF8.sublime-settings" under "User" folder.
+Please check ConvertToUTF8.sublime-settings file for details. You should save your personal settings in a file named "ConvertToUTF8.sublime-settings" under "User" folder. You can set project-specific settings (except encoding_list and max_cache_size) in the .sublime-project file which can be opened via "Project > Edit Project" menu.
 
 * encoding_list: encoding selection list when detection is failed
 * max_cache_size: maximum encoding cache size, 0 means no cache (default: 100)
@@ -82,7 +82,7 @@ Q & A
 
 * Q: My file was saved as UTF-8 and it's in a mess, how can I recover it?
 
-  A: Please open the file and make sure its encoding is UTF-8, then choose the menu entry "File -> Save with Encoding -> Western (Windows 1252)", close and reopen this file.
+  A: Please open the file and make sure its encoding is UTF-8, then choose the menu entry "File > Save with Encoding > Western (Windows 1252)", close and reopen this file.
 
 Contact me
 ------------------

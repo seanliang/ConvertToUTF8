@@ -116,6 +116,10 @@ def get_settings():
 	SETTINGS['convert_on_save'] = settings.get('convert_on_save', 'always')
 	SETTINGS['lazy_reload'] = settings.get('lazy_reload', True)
 
+def get_setting(view, key):
+	# read project specific settings first
+	return view.settings().get(key, SETTINGS[key]);
+
 TMP_DIR = None
 
 def get_temp_name(name):
@@ -157,17 +161,18 @@ def init_settings():
 
 def setup_views():
 	clean_temp_folder()
-	if SETTINGS['convert_on_load'] == 'never':
-		return
-	# existing views should be checked
+	# check existing views
 	for win in sublime.windows():
 		for view in win.views():
+			if get_setting(view, 'convert_on_load') == 'never':
+				break
 			if view.is_dirty() or view.settings().get('origin_encoding'):
 				show_encoding_status(view)
 				continue
 			file_name = view.file_name()
 			encoding = view.encoding()
-			threading.Thread(target=lambda: detect(view, file_name, encoding)).start()
+			cnt = get_setting(view, 'max_detect_lines')
+			threading.Thread(target=lambda: detect(view, file_name, encoding, cnt)).start()
 
 def plugin_loaded():
 	init_settings()
@@ -183,7 +188,7 @@ if not ST3:
 	init_settings()
 	wait_for_ready()
 
-def detect(view, file_name, encoding):
+def detect(view, file_name, encoding, cnt):
 	if not file_name or not os.path.exists(file_name):
 		return
 	if not encoding.endswith(' with BOM'):
@@ -193,7 +198,6 @@ def detect(view, file_name, encoding):
 		return
 	sublime.set_timeout(lambda: view.set_status('origin_encoding', 'Detecting encoding, please wait...'), 0)
 	detector = UniversalDetector()
-	cnt = SETTINGS['max_detect_lines']
 	fp = open(file_name, 'rb')
 	for line in fp:
 		# cut MS-Windows CR code
@@ -370,7 +374,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 			return
 		except UnicodeDecodeError as e:
 			if detect_on_fail:
-				detect(view, file_name, view.encoding())
+				detect(view, file_name, view.encoding(), get_setting(view, 'max_detect_lines'))
 				return
 			superset = SUPERSETS.get(encoding)
 			if superset:
@@ -446,7 +450,7 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		fp = open(tmp_name, 'wb')
 		fp.write(contents)
 		fp.close()
-		if not SETTINGS['lazy_reload']:
+		if not get_setting(view, 'lazy_reload'):
 			# os.rename has "Invalid cross-device link" issue
 			shutil.move(tmp_name, file_name)
 		else:
@@ -475,8 +479,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		return False
 
 	def on_new(self, view):
-		if SETTINGS.get('default_encoding_on_create'):
-			init_encoding_vars(view, SETTINGS['default_encoding_on_create'], False)
+		if get_setting(view, 'default_encoding_on_create'):
+			init_encoding_vars(view, get_setting(view, 'default_encoding_on_create'), False)
 
 	def on_clone(self, view):
 		clone_numbers = view.settings().get('clone_numbers', 0)
@@ -515,7 +519,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 					return
 			else:
 				return
-		if SETTINGS['convert_on_load'] == 'never':
+		if get_setting(view, 'convert_on_load') == 'never':
 			return
 		self.perform_action(view, file_name, 5)
 
@@ -539,10 +543,11 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			if v.file_name() == file_name:
 				v.settings().erase('prevent_detect')
 		encoding = view.encoding()
-		threading.Thread(target=lambda: detect(view, file_name, encoding)).start()
+		cnt = get_setting(view, 'max_detect_lines')
+		threading.Thread(target=lambda: detect(view, file_name, encoding, cnt)).start()
 
 	def perform_action(self, view, file_name, times):
-		if SETTINGS['preview_action'] != 'convert_and_open' and self.is_preview(view):
+		if get_setting(view, 'preview_action') != 'convert_and_open' and self.is_preview(view):
 			if times > 0:
 				# give it another chance before everything is ready
 				sublime.set_timeout(lambda: self.perform_action(view, file_name, times - 1), 100)
@@ -551,7 +556,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			return
 		view.settings().erase('is_preview')
 		encoding = view.encoding()
-		threading.Thread(target=lambda: detect(view, file_name, encoding)).start()
+		cnt = get_setting(view, 'max_detect_lines')
+		threading.Thread(target=lambda: detect(view, file_name, encoding, cnt)).start()
 
 	def on_modified(self, view):
 		encoding = view.encoding()
@@ -563,7 +569,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		if not view.settings().get('in_converting'):
 			if view.settings().get('is_preview'):
 				view.settings().erase('is_preview')
-				detect(view, file_name, encoding)
+				detect(view, file_name, encoding, get_setting(view, 'max_detect_lines'))
 			return
 		if self.check_clones(view):
 			return
@@ -587,7 +593,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 					sublime.set_timeout(lambda: self.undo_me(view), 0)
 				else:
 					# file was modified outside
-					threading.Thread(target=lambda: detect(view, file_name, encoding)).start()
+					cnt = get_setting(view, 'max_detect_lines')
+					threading.Thread(target=lambda: detect(view, file_name, encoding, cnt)).start()
 		else:
 			view.set_scratch(False)
 
@@ -595,14 +602,14 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		view.settings().erase('prevent_detect')
 		view.run_command('undo')
 		# st3 will reload file immediately
-		if view.settings().get('revert_to_scratch') or (ST3 and not SETTINGS['lazy_reload']):
+		if view.settings().get('revert_to_scratch') or (ST3 and not get_setting(view, 'lazy_reload')):
 			view.set_scratch(True)
 
 	def on_deactivated(self, view):
 		# st2 will reload file when on_deactivated
 		if view.settings().get('prevent_detect'):
 			file_name = view.file_name()
-			if SETTINGS['lazy_reload']:
+			if get_setting(view, 'lazy_reload'):
 				tmp_name = os.path.join(TMP_DIR, get_temp_name(file_name))
 				shutil.move(tmp_name, file_name)
 			remove_reverting(file_name)
@@ -634,7 +641,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		file_name = view.file_name()
 		if file_name in stamps:
 			del stamps[file_name]
-		if SETTINGS['convert_on_save'] == 'never':
+		if get_setting(view, 'convert_on_save') == 'never':
 			return
 		# file was saved with other encoding
 		if view_encoding != 'UTF-8':

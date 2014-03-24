@@ -29,7 +29,7 @@
 
 设置
 ------------------
-请查看 ConvertToUTF8.sublime-settings 文件获取详细信息。为防止更新插件时被覆盖，请将个人设置保存到 User 目录中名为 ConvertToUTF8.sublime-settings 文件中。
+请查看 ConvertToUTF8.sublime-settings 文件获取详细信息。为防止更新插件时被覆盖，请将个人设置保存到 User 目录中名为 ConvertToUTF8.sublime-settings 文件中。您可以在 .sublime-project 文件（可通过 Project > Edit Project 打开）中指定项目专属设置（除 encoding_list 和 max_cache_size 外）。
 
 * encoding_list：检测失败时显示的编码列表
 * max_cache_size：最大编码缓存数量，0 表示不缓存（默认为 100）
@@ -82,7 +82,7 @@
 
 * 问：我的文件被保存为UTF-8，而且变成了乱码，要如何恢复？
 
-  答：请打开这个文件，并确认它的编码是UTF-8，然后选择菜单项目“File -> Save with Encoding -> Western (Windows 1252)”，关闭再重新打开该文件即可。
+  答：请打开这个文件，并确认它的编码是UTF-8，然后选择菜单项目 File > Save with Encoding > Western (Windows 1252)，关闭再重新打开该文件即可。
 
 联系我
 ------------------

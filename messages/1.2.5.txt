@@ -1,0 +1,5 @@
+ConvertToUTF8 1.2.5 Changelog
+
+Enhancements
+- Add package settings menu (#34, thanks to @doggy8088)
+- Add project-specific settings (#37, thanks to @jasonslyvia)
