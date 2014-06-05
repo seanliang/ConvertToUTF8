@@ -1,0 +1,4 @@
+ConvertToUTF8 1.2.6 Changelog
+
+Enhancements
+- Let user choose the encoding for possible UTF-8 files (#38, thanks to @pierrewrs)

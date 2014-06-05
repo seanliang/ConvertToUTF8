@@ -170,9 +170,8 @@ def setup_views():
 				show_encoding_status(view)
 				continue
 			file_name = view.file_name()
-			encoding = view.encoding()
 			cnt = get_setting(view, 'max_detect_lines')
-			threading.Thread(target=lambda: detect(view, file_name, encoding, cnt)).start()
+			threading.Thread(target=lambda: detect(view, file_name, cnt)).start()
 
 def plugin_loaded():
 	init_settings()
@@ -188,11 +187,10 @@ if not ST3:
 	init_settings()
 	wait_for_ready()
 
-def detect(view, file_name, encoding, cnt):
+def detect(view, file_name, cnt):
 	if not file_name or not os.path.exists(file_name):
 		return
-	if not encoding.endswith(' with BOM'):
-		encoding = encoding_cache.pop(file_name)
+	encoding = encoding_cache.pop(file_name)
 	if encoding:
 		sublime.set_timeout(lambda: init_encoding_vars(view, encoding, detect_on_fail=True), 0)
 		return
@@ -215,18 +213,26 @@ def detect(view, file_name, encoding, cnt):
 	sublime.set_timeout(lambda: check_encoding(view, encoding, confidence), 0)
 
 def check_encoding(view, encoding, confidence):
-	view.set_status('origin_encoding', ('Detected {0} with {1:.0%} confidence'.format(encoding, confidence)) if encoding else 'Encoding can not be detected')
-	if not encoding or confidence < 0.95:
-		view_encoding = view.encoding()
-		if view_encoding == view.settings().get('fallback_encoding'):
-			# show error only when the ST can't detect the encoding either
+	view_encoding = view.encoding()
+	result = 'Detected {0} vs {1} with {2:.0%} confidence'.format(encoding, view_encoding, confidence) if encoding else 'Encoding can not be detected'
+	view.set_status('origin_encoding', result)
+	print(result)
+	not_detected = not encoding or confidence < 0.95 or encoding == view_encoding
+	# ST can't detect the encoding
+	if view_encoding in ('Undefined', view.settings().get('fallback_encoding')):
+		if not_detected:
 			show_selection(view)
 			return
-		else:
+	else:
+		if not_detected:
 			# using encoding detected by ST
-			if view_encoding == 'Undefined':
-				view_encoding = 'ASCII'
 			encoding = view_encoding
+		else:
+			show_selection(view, [
+				['{0} ({1:.0%})'.format(encoding, confidence), encoding],
+				['{0}'.format(view_encoding), view_encoding]
+			])
+			return
 	init_encoding_vars(view, encoding)
 
 def show_encoding_status(view):
@@ -243,7 +249,7 @@ def init_encoding_vars(view, encoding, run_convert=True, stamp=None, detect_on_f
 	view.settings().set('origin_encoding', encoding)
 	show_encoding_status(view)
 	if encoding in SKIP_ENCODINGS or encoding == view.encoding():
-		encoding_cache.pop(view.file_name())
+		encoding_cache.set(view.file_name(), encoding)
 		return
 	view.settings().set('in_converting', True)
 	if run_convert:
@@ -266,9 +272,11 @@ def remove_reverting(file_name):
 		REVERTING_FILES.remove(file_name)
 
 class EncodingSelection(threading.Thread):
-	def __init__(self, view):
+	def __init__(self, view, names, codes):
 		threading.Thread.__init__(self)
 		self.view = view
+		self.names = names
+		self.codes = codes
 
 	def run(self):
 		sublime.set_timeout(self.show_panel, 0)
@@ -276,41 +284,47 @@ class EncodingSelection(threading.Thread):
 	def show_panel(self):
 		window = self.view.window()
 		if window:
-			window.show_quick_panel(ENCODINGS_NAME, self.on_done)
+			window.show_quick_panel(self.names, self.on_done)
 
 	def on_done(self, selected):
 		if selected == -1:
 			clean_encoding_vars(self.view)
 		else:
-			init_encoding_vars(self.view, ENCODINGS_CODE[selected])
+			init_encoding_vars(self.view, self.codes[selected])
 
-def show_selection(view):
-	EncodingSelection(view).start()
+def show_selection(view, encoding_list = None):
+	if encoding_list:
+		names = [pair[0] for pair in encoding_list]
+		codes = [pair[1] for pair in encoding_list]
+	else:
+		names = ENCODINGS_NAME
+		codes = ENCODINGS_CODE
+	EncodingSelection(view, names, codes).start()
 
 class ReloadWithEncoding(threading.Thread):
-    def __init__(self, view, encoding):
-        threading.Thread.__init__(self)
-        self.view = view
-        self.encoding = encoding
+	def __init__(self, view, encoding):
+		threading.Thread.__init__(self)
+		self.view = view
+		self.encoding = encoding
 
-    def run(self):
-        sublime.set_timeout(self.reload, 0)
+	def run(self):
+		sublime.set_timeout(self.reload, 0)
 
-    def reload(self):
-        init_encoding_vars(self.view, self.encoding)
+	def reload(self):
+		init_encoding_vars(self.view, self.encoding)
 
 def reload_encoding(view, encoding):
-    ReloadWithEncoding(view, encoding).start()
+	ReloadWithEncoding(view, encoding).start()
 
 stamps = {}
 
 class ShowEncodingSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        show_selection(self.view)
+	def run(self, edit):
+		show_selection(self.view)
 
 class ReloadWithEncodingCommand(sublime_plugin.TextCommand):
-    def run(self, edit, encoding):
-        reload_encoding(self.view, encoding)
+	def run(self, edit, encoding):
+		reload_encoding(self.view, encoding)
 
 class PyInstructionCommand(sublime_plugin.TextCommand):
 	def get_branch(self, platform, arch):
@@ -334,7 +348,7 @@ class PyInstructionCommand(sublime_plugin.TextCommand):
 			msg = msg + 'please install Codecs{0} (https://github.com/seanliang/Codecs{0}/tree/{1}) and restart Sublime Text to make ConvertToUTF8 work properly. If it is still not working, '.format(ver, branch)
 
 		import platform
-		msg = msg + 'please kindly send the following information to sunlxy#yahoo.com:\n====== Debug Information ======\nVersion: {0}-{1}\nPlatform: {2}\nPath: {3}\nEncoding: {4}\n'.format(
+		msg = msg + 'please kindly send the following information to sunlxy (at) yahoo.com:\n====== Debug Information ======\nVersion: {0}-{1}\nPlatform: {2}\nPath: {3}\nEncoding: {4}\n'.format(
 			sublime.version(), sublime.arch(), platform.platform(), sys.path, encoding
 		)
 		self.view.insert(edit, 0, msg)
@@ -374,7 +388,7 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 			return
 		except UnicodeDecodeError as e:
 			if detect_on_fail:
-				detect(view, file_name, view.encoding(), get_setting(view, 'max_detect_lines'))
+				detect(view, file_name, get_setting(view, 'max_detect_lines'))
 				return
 			superset = SUPERSETS.get(encoding)
 			if superset:
@@ -497,7 +511,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			remove_reverting(view.file_name())
 
 	def on_load(self, view):
-		if view.encoding() == 'Hexadecimal':
+		encoding = view.encoding()
+		if encoding == 'Hexadecimal' or encoding.endswith(' BOM'):
 			return
 		file_name = view.file_name()
 		if not file_name:
@@ -542,9 +557,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		for v in window.views():
 			if v.file_name() == file_name:
 				v.settings().erase('prevent_detect')
-		encoding = view.encoding()
 		cnt = get_setting(view, 'max_detect_lines')
-		threading.Thread(target=lambda: detect(view, file_name, encoding, cnt)).start()
+		threading.Thread(target=lambda: detect(view, file_name, cnt)).start()
 
 	def perform_action(self, view, file_name, times):
 		if get_setting(view, 'preview_action') != 'convert_and_open' and self.is_preview(view):
@@ -555,9 +569,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			view.settings().set('is_preview', True)
 			return
 		view.settings().erase('is_preview')
-		encoding = view.encoding()
 		cnt = get_setting(view, 'max_detect_lines')
-		threading.Thread(target=lambda: detect(view, file_name, encoding, cnt)).start()
+		threading.Thread(target=lambda: detect(view, file_name, cnt)).start()
 
 	def on_modified(self, view):
 		encoding = view.encoding()
@@ -569,7 +582,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		if not view.settings().get('in_converting'):
 			if view.settings().get('is_preview'):
 				view.settings().erase('is_preview')
-				detect(view, file_name, encoding, get_setting(view, 'max_detect_lines'))
+				detect(view, file_name, get_setting(view, 'max_detect_lines'))
 			return
 		if self.check_clones(view):
 			return
@@ -594,7 +607,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 				else:
 					# file was modified outside
 					cnt = get_setting(view, 'max_detect_lines')
-					threading.Thread(target=lambda: detect(view, file_name, encoding, cnt)).start()
+					threading.Thread(target=lambda: detect(view, file_name, cnt)).start()
 		else:
 			view.set_scratch(False)
 
