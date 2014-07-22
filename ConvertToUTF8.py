@@ -23,8 +23,8 @@ SUPERSETS = {
 	'GB2312': 'GBK',
 	'GBK': 'GB18030',
 	'BIG5': 'CP950', # CP950 is common in Taiwan
-	'CP950': 'BIG5-HKSCS', # HK official Big5 variant
-	'EUC-KR': 'CP949' # CP949 is a superset of euc-kr!
+	'CP950': 'BIG5-HKSCS' # HK official Big5 variant
+	'CP949': 'EUC-KR' # CP949 is a superset of euc-kr!
 }
 
 SETTINGS = {}
