@@ -467,6 +467,7 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		fp.close()
 		if not get_setting(view, 'lazy_reload'):
 			# os.rename has "Invalid cross-device link" issue
+			os.chmod(tmp_name, os.stat(file_name)[0])
 			shutil.move(tmp_name, file_name)
 		else:
 			# copy the timestamp from original file
@@ -625,6 +626,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			file_name = view.file_name()
 			if get_setting(view, 'lazy_reload'):
 				tmp_name = os.path.join(TMP_DIR, get_temp_name(file_name))
+				os.chmod(tmp_name, os.stat(file_name)[0])
 				shutil.move(tmp_name, file_name)
 			remove_reverting(file_name)
 			view.settings().set('revert_to_scratch', not view.is_dirty())
