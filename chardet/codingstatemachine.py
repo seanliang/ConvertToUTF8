@@ -25,7 +25,7 @@
 # 02110-1301  USA
 ######################### END LICENSE BLOCK #########################
 
-from .constants import eStart, eError
+from .constants import eStart
 from .compat import wrap_ord
 
 
@@ -43,10 +43,7 @@ class CodingStateMachine:
         # for each byte we get its class
         # if it is first byte, we also get byte length
         # PY3K: aBuf is a byte stream, so c is an int, not a byte
-        try:
-            byteCls = self._mModel['classTable'][wrap_ord(c)]
-        except IndexError:
-            return eError
+        byteCls = self._mModel['classTable'][wrap_ord(c)]
         if self._mCurrentState == eStart:
             self._mCurrentBytePos = 0
             self._mCurrentCharLen = self._mModel['charLenTable'][byteCls]

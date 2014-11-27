@@ -9,11 +9,12 @@ Please check ConvertToUTF8.sublime-settings file for details. You should save yo
 * encoding_list: encoding selection list when detection is failed
 * max_cache_size: maximum encoding cache size, 0 means no cache (default: 100)
 * max_detect_lines: maximum detection lines, 0 means unlimited (default: 600)
-* preview_action: specific the action when previewing a file, available options: no_action, convert_and_open (default: no_action)
-* default_encoding_on_create: specific the default encoding for newly created file (such as "GBK"), empty value means using sublime text's "default_encoding" setting (default: empty)
-* convert_on_load: enable/disable convert file content to UTF-8 when it is loaded, available options: always, never (default: always)
-* convert_on_save: enable/disable convert file from UTF-8 to a specific encoding when it is saved, available options: always, never (default: always)
-* lazy_reload: enable/disable save file to a temporary location, and reload it in background when switching to other windows or tabs, available options: true, false (default: false)
+* preview_action: converting the file's content to UTF-8 when previewing it (default: false)
+* default_encoding_on_create: specific the default encoding for newly created file (such as "GBK"), empty value means using sublime text's "default_encoding" setting (default: '')
+* convert_on_load: convert the file's content to UTF-8 when it is loaded (default: true)
+* convert_on_save: convert the file's content from UTF-8 to its original (or specific) encoding when it is saved (default: true)
+* convert_on_find: convert the text in Find Results view to UTF-8 (default: false)
+* lazy_reload: save file to a temporary location, and reload it in background when switching to other windows or tabs (default: false)
 
 Contact me
 ------------------

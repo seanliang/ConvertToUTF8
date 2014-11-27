@@ -74,10 +74,7 @@ class SingleByteCharSetProber(CharSetProber):
         if not aLen:
             return self.get_state()
         for c in aBuf:
-            try:
-                order = self._mModel['charToOrderMap'][wrap_ord(c)]
-            except IndexError:
-                return constants.eError
+            order = self._mModel['charToOrderMap'][wrap_ord(c)]
             if order < SYMBOL_CAT_ORDER:
                 self._mTotalChar += 1
             if order < SAMPLE_SIZE:

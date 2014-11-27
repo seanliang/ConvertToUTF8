@@ -1,0 +1,11 @@
+ConvertToUTF8 1.2.8 Changelog
+
+New Features
+- Added "convert_on_find" setting for converting the text in Find Results view (defaults to false). (#39, thanks to @songenhin)
+
+Enhancements
+- A better handle on Codecs plugin
+- Change all setting options to boolean type (true or false)
+
+Fixed
+- Encode selection for empty file (#44 and #45, thanks to @knight9999 and @fyears)

@@ -11,11 +11,7 @@ If you want to support this plugin, you can donate via PayPal or Alipay. Thanks!
 
 Note
 ------------------
-** For Linux users: ConvertToUTF8 relies on several dynamic libraries which are missing in embedded version of Python of Sublime Text 2 and 3. This plugin can not work fully until you install them manully.
-
-** For OS X users: Sublime Text 3 uses an embedded Python which is facing the same problem as Linux version.
-
-** I've reported this problem to Jon but did not get any response yet, so I created extra plugins to solve it. ConvertToUTF8 will show you the instructions when necessary.
+** If the plugin can not work properly, you might need to install an extra plugin: [Codecs26](https://github.com/seanliang/Codecs26) for Sublime Text 2 or [Codecs33](https://github.com/seanliang/Codecs33) for Sublime Text 3.
 
 Installation
 ------------------
@@ -34,11 +30,12 @@ Please check ConvertToUTF8.sublime-settings file for details. You should save yo
 * encoding_list: encoding selection list when detection is failed
 * max_cache_size: maximum encoding cache size, 0 means no cache (default: 100)
 * max_detect_lines: maximum detection lines, 0 means unlimited (default: 600)
-* preview_action: specific the action when previewing a file, available options: no_action, convert_and_open (default: no_action)
-* default_encoding_on_create: specific the default encoding for newly created file (such as "GBK"), empty value means using sublime text's "default_encoding" setting (default: empty)
-* convert_on_load: enable/disable convert file content to UTF-8 when it is loaded, available options: always, never (default: always)
-* convert_on_save: enable/disable convert file from UTF-8 to a specific encoding when it is saved, available options: always, never (default: always)
-* lazy_reload: enable/disable save file to a temporary location, and reload it in background when switching to other windows or tabs, available options: true, false (default: false)
+* preview_action: converting the file's content to UTF-8 when previewing it (default: false)
+* default_encoding_on_create: specific the default encoding for newly created file (such as "GBK"), empty value means using sublime text's "default_encoding" setting (default: "")
+* convert_on_load: convert the file's content to UTF-8 when it is loaded (default: true)
+* convert_on_save: convert the file's content from UTF-8 to its original (or specific) encoding when it is saved (default: true)
+* convert_on_find: convert the text in Find Results view to UTF-8 (default: false)
+* lazy_reload: save file to a temporary location, and reload it in background when switching to other windows or tabs (default: false)
 
 Usage
 ------------------
@@ -47,11 +44,10 @@ In most cases, this plug-in will take care of encoding issues automatically.
 You can also use the "File > Set File Encoding to" menu entry to transform between different encodings. For example, you can open a UTF-8 file, and save it to GBK, and vice versa.
 
 Note:
-* if convert_on_save is set to never, the file will *NEVER* be saved to the selected encoding
+* if convert_on_save is set to `false`, the file will *NEVER* be saved to the selected encoding
 * please do not edit the file before the encoding detection process is finished
 * please try either increasing the value of max_detect_lines or set the encoding manually if the detection result is not accurate
-* due to limitation of API, when lazy_reload is set to true, quit Sublime Text immediately after saving a file will cause the file to be saved as UTF-8, the correct content will be reload next time Sublime Text starts
-
+* due to limitation of API, when lazy_reload is set to `true`, quit Sublime Text immediately after saving a file will cause the file to be saved as UTF-8, the correct content will be reload next time Sublime Text starts
 
 Q & A
 ------------------
