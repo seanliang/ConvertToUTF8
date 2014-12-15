@@ -64,8 +64,13 @@ class EncodingCache(object):
 		if not os.path.exists(self.file):
 			return
 		fp = open(self.file, 'r')
-		self.cache = json.load(fp)
-		fp.close()
+		try:
+			self.cache = json.load(fp)
+		except ValueError:
+			# the cache file is corrupted
+			return
+		finally:
+			fp.close()
 		if len(self.cache) > 0:
 			if 'file' in self.cache[0]:
 				# old style cache
