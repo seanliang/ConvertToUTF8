@@ -181,20 +181,6 @@ def init_settings():
 	if not os.path.exists(TMP_DIR):
 		os.mkdir(TMP_DIR)
 
-def setup_views():
-	clean_temp_folder()
-	# check existing views
-	for win in sublime.windows():
-		for view in win.views():
-			if not get_setting(view, 'convert_on_load'):
-				break
-			if view.is_dirty() or view.settings().get('origin_encoding'):
-				show_encoding_status(view)
-				continue
-			file_name = view.file_name()
-			cnt = get_setting(view, 'max_detect_lines')
-			threading.Thread(target=lambda: detect(view, file_name, cnt)).start()
-
 def plugin_loaded():
 	init_settings()
 	setup_views()
@@ -234,6 +220,20 @@ def detect(view, file_name, cnt):
 	confidence = detector.result['confidence']
 	sublime.set_timeout(lambda: check_encoding(view, encoding, confidence), 0)
 
+def setup_views():
+	clean_temp_folder()
+	# check existing views
+	for win in sublime.windows():
+		for view in win.views():
+			if not get_setting(view, 'convert_on_load'):
+				break
+			if view.is_dirty() or view.settings().get('origin_encoding'):
+				show_encoding_status(view)
+				continue
+			file_name = view.file_name()
+			cnt = get_setting(view, 'max_detect_lines')
+			threading.Thread(target=lambda: detect(view, file_name, cnt)).start()
+			
 def check_encoding(view, encoding, confidence):
 	view_encoding = view.encoding()
 	result = 'Detected {0} vs {1} with {2:.0%} confidence'.format(encoding, view_encoding, confidence) if encoding else 'Encoding can not be detected'
