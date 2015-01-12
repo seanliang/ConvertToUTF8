@@ -456,12 +456,12 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		sel = view.sel()
 		rs = [x for x in sel]
 		vp = view.viewport_position()
-		view.set_viewport_position(tuple([0, 0]))
+		view.set_viewport_position((0, 0), False)
 		view.replace(edit, regions, contents)
 		sel.clear()
 		for x in rs:
 			sel.add(sublime.Region(x.a, x.b))
-		view.set_viewport_position(vp)
+		view.set_viewport_position(vp, False)
 		stamps[file_name] = stamp
 		sublime.status_message('{0} -> UTF8'.format(encoding))
 
@@ -484,6 +484,12 @@ class ConvertFromUtf8Command(sublime_plugin.TextCommand):
 		if not encoding or encoding == 'UTF-8':
 			encoding_cache.pop(file_name)
 			return
+		# remember current folded regions
+		regions = [[x.a, x.b] for x in view.folded_regions()]
+		if regions:
+			view.settings().set('folded_regions', regions)
+		vp = view.viewport_position()
+		view.settings().set('viewport_position', [vp[0], vp[1]])
 		fp = None
 		try:
 			fp = open(file_name, 'rb')
@@ -736,6 +742,16 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 	def undo_me(self, view):
 		view.settings().erase('prevent_detect')
 		view.run_command('undo')
+		# restore folded regions
+		regions = view.settings().get('folded_regions')
+		if regions:
+			view.settings().erase('folded_regions')
+			folded = [sublime.Region(int(region[0]), int(region[1])) for region in regions]
+			view.fold(folded)
+		vp = view.settings().get('viewport_position')
+		if vp:
+			view.settings().erase('viewport_position')
+			view.set_viewport_position((vp[0], vp[1]), False)
 		# st3 will reload file immediately
 		if view.settings().get('revert_to_scratch') or (ST3 and not get_setting(view, 'lazy_reload')):
 			view.set_scratch(True)

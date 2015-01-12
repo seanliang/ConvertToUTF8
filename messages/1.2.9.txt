@@ -1,0 +1,7 @@
+ConvertToUTF8 1.2.9 Changelog
+
+Enhancements
+- Restore folded regions after reloading (#49, thanks to @tinymins)
+
+Fixed
+- Malfunction caused by the corrupted cache file
