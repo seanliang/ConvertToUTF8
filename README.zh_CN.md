@@ -9,10 +9,11 @@
 ![支付宝钱包扫一下](http://dl.dropboxusercontent.com/u/31937639/alipay_code.png) 或 
 [![PayPal捐助](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=GP6Y25N7Q9E26&lc=US&item_name=Buy%20me%20a%20cup%20of%20coffee&item_number=ConvertToUTF8&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
 
-
 注意
 ------------------
-** 如果本插件无法正常工作，则可能需要安装一个额外插件：[Codecs26](https://github.com/seanliang/Codecs26)（针对 Sublime Text 2）或 [Codecs33](https://github.com/seanliang/Codecs33)（针对 Sublime Text 3）。
+** Windows 7（Sublime Text 3）：当设置Windows自定义文本大小（DPI）超过100%时，文件名可能无法正确显示，请尝试在Sublime Text 3的用户设置中添加`"dpi_scale": 1`。
+
+** Linux（Sublime Text 2 & 3）及OSX（Sublime Text 3）：你需要安装一个额外插件以便ConvertToUTF8能正常工作：[Codecs26](https://github.com/seanliang/Codecs26)（针对 Sublime Text 2）或 [Codecs33](https://github.com/seanliang/Codecs33)（针对 Sublime Text 3）。
 
 安装
 ------------------
