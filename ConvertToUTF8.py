@@ -624,6 +624,11 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		encoding = view.encoding()
 		if encoding == 'Hexadecimal' or encoding.endswith(' BOM'):
 			return
+		
+		#if sublime text already load right, no need to check the file's encoding
+		if encoding not in ('Undefined', view.settings().get('fallback_encoding')):
+			return
+		
 		file_name = view.file_name()
 		if not file_name:
 			return
