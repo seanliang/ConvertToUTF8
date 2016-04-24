@@ -188,6 +188,7 @@ def setup_views():
 		for view in win.views():
 			if not get_setting(view, 'convert_on_load'):
 				break
+			view.settings().set('is_init_dirty_state', view.is_dirty())
 			if view.is_dirty() or view.settings().get('origin_encoding'):
 				show_encoding_status(view)
 				continue
@@ -725,7 +726,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			if command1[0] == 'convert_to_utf8':
 				view.run_command('redo')
 			else:
-				view.set_scratch(True)
+				view.set_scratch(not view.settings().get('is_init_dirty_state', False))
 		elif command[0] == 'convert_to_utf8':
 			if file_name in stamps:
 				if stamps[file_name] == command[1].get('stamp'):
