@@ -724,6 +724,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		if command == NONE_COMMAND:
 			if command1[0] == 'convert_to_utf8':
 				view.run_command('redo')
+			else:
+				view.set_scratch(True)
 		elif command[0] == 'convert_to_utf8':
 			if file_name in stamps:
 				if stamps[file_name] == command[1].get('stamp'):
