@@ -188,6 +188,7 @@ def setup_views():
 		for view in win.views():
 			if not get_setting(view, 'convert_on_load'):
 				break
+			view.settings().set('is_init_dirty_state', view.is_dirty())
 			if view.is_dirty() or view.settings().get('origin_encoding'):
 				show_encoding_status(view)
 				continue
@@ -624,11 +625,11 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		encoding = view.encoding()
 		if encoding == 'Hexadecimal' or encoding.endswith(' BOM'):
 			return
-		
+
 		#if sublime text already load right, no need to check the file's encoding
 		if encoding not in ('Undefined', view.settings().get('fallback_encoding')):
 			return
-		
+
 		file_name = view.file_name()
 		if not file_name:
 			return
@@ -719,11 +720,13 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			return
 		if self.check_clones(view):
 			return
-		command = view.command_history(0)
-		command1 = view.command_history(1)
+		command = view.command_history(0, True)
+		command1 = view.command_history(1, True)
 		if command == NONE_COMMAND:
 			if command1[0] == 'convert_to_utf8':
 				view.run_command('redo')
+			else:
+				view.set_scratch(not view.settings().get('is_init_dirty_state', False))
 		elif command[0] == 'convert_to_utf8':
 			if file_name in stamps:
 				if stamps[file_name] == command[1].get('stamp'):
