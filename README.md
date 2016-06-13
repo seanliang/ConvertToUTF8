@@ -38,6 +38,7 @@ Please check ConvertToUTF8.sublime-settings file for details. You should save yo
 * convert_on_save: convert the file's content from UTF-8 to its original (or specific) encoding when it is saved (default: true)
 * convert_on_find: convert the text in Find Results view to UTF-8 (default: false)
 * lazy_reload: save file to a temporary location, and reload it in background when switching to other windows or tabs (default: false)
+* confidence: The minimum confidence rate which the converting will be performed automatic. (default: 0.95)
 
 Usage
 ------------------

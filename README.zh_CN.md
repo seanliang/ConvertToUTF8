@@ -38,6 +38,7 @@
 * convert_on_save：文件保存时是否将其内容转换成原有（或指定）编码（默认为 true）
 * convert_on_find：将 Find Results 窗口里的内容转换成 UTF-8（默认为 false）
 * lazy_reload：将文件保存到临时位置，并在切换窗口或标签时在后台自动重载（默认为 false）
+* confidence：最低可信率，检测时超过这个值将触发自动转换（默认为0.95）
 
 使用说明
 ------------------
