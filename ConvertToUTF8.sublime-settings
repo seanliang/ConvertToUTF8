@@ -2,6 +2,7 @@
 	// supported encoding list, name & code in pair
 	"encoding_list" : [
 		["Chinese Simplified (GBK)", "GBK"],
+		["Chinese Simplified (GB2312)", "GB2312"],
 		["Chinese Simplified (GB18030)", "GB18030"],
 		["Chinese Traditional (BIG5)", "BIG5"],
 		["Korean (EUC-KR)", "EUC-KR"],
@@ -25,6 +26,9 @@
 
 	// Set this option to true will cause Sublime Text reload the saved file when losing focus
 	"lazy_reload": false,
+
+	// The minimum confidence rate between 0.0 and 1.0
+	"confidence": 0.95,
 
 	// Convert in Find Results view
 	"convert_on_find": false,

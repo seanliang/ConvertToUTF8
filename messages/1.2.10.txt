@@ -1,0 +1,10 @@
+ConvertToUTF8 1.2.10 Changelog
+
+Enhancements
+- Add a new option "confidence" (#66, thanks to @doraemoncyx)
+- A better handle for restoring selections (#67, thanks to @tianjun9)
+
+Fixed
+- Only record command that modifies the buffer (#53, thanks to @demon386)
+
+** The cursor position might be wrong after restoring.
