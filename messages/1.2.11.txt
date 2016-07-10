@@ -1,0 +1,7 @@
+ConvertToUTF8 1.2.11 Changelog
+
+Enhancements
+- Save the cache contents only when necessary
+
+Fixed
+- Handle the unload event to avoid AttributeError (#68, thanks to @Timandes)

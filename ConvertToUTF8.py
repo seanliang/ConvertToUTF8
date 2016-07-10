@@ -42,18 +42,18 @@ class EncodingCache(object):
 		self.max_size = -1
 		self.dirty = False
 		self.load()
-		self.save_on_dirty()
 
 	def save_on_dirty(self):
 		if self.dirty:
-			self.save()
-		sublime.set_timeout(self.save_on_dirty, 10000)
+			return
+		self.dirty = True
+		sublime.set_timeout(self.save, 10000)
 
 	def shrink(self):
 		if self.max_size < 0:
 			return
 		if len(self.cache) > self.max_size:
-			self.dirty = True
+			self.save_on_dirty()
 			del self.cache[self.max_size:]
 
 	def set_max_size(self, max_size):
@@ -80,7 +80,7 @@ class EncodingCache(object):
 						item['file']: item['encoding']
 					})
 				self.cache = new_cache
-				self.dirty = True
+				self.save_on_dirty()
 
 	def save(self):
 		self.shrink()
@@ -99,7 +99,7 @@ class EncodingCache(object):
 		for item in self.cache:
 			if file_name in item:
 				self.cache.remove(item)
-				self.dirty = True
+				self.save_on_dirty()
 				return item.get(file_name)
 		return None
 
@@ -110,7 +110,7 @@ class EncodingCache(object):
 		self.cache.insert(0, {
 			file_name: encoding
 		})
-		self.dirty = True
+		self.save_on_dirty()
 
 encoding_cache = None
 
@@ -200,6 +200,10 @@ def setup_views():
 def plugin_loaded():
 	init_settings()
 	setup_views()
+
+def plugin_unloaded():
+	encoding_cache = None
+	sublime.load_settings('ConvertToUTF8.sublime-settings').clear_on_change('get_settings')
 
 def wait_for_ready():
 	if sublime.windows():
