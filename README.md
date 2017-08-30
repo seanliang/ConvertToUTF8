@@ -16,13 +16,13 @@ Note
 
 Installation
 ------------------
-Using [Package Control](https://sublime.wbond.net/installation) to find, install and upgrade *ConvertToUTF8* is the recommended method to install this plug-in.
+Using [Package Control](https://packagecontrol.io/installation) to find, install and upgrade *ConvertToUTF8* is the recommended method to install this plug-in.
 
 Otherwise, you can download this repository as a zip file, unzip it, and rename the new folder to *ConvertToUTF8*, then move this folder to *Packages* folder of Sublime Text (You can find the *Packages* folder by clicking "Preferences > Browse Packages" menu entry in Sublime Text).
 
 Your folder hierarchy should look like this:
 
-![Folder Hierarchy](http://dl.dropboxusercontent.com/u/31937639/ConvertToUTF8/hierarchy.png)
+![Folder Hierarchy](https://seanliang.github.io/donate/hierarchy.png)
 
 Configuration
 ------------------
