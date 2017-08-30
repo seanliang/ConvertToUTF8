@@ -17,13 +17,13 @@
 
 安装
 ------------------
-推荐使用 [Package Control](https://sublime.wbond.net/installation) 查找 *ConvertToUTF8* 进行自动下载安装与更新。
+推荐使用 [Package Control](https://packagecontrol.io/installation) 查找 *ConvertToUTF8* 进行自动下载安装与更新。
 
 如需手工安装，请将本项目打包下载并解压，将解压后的文件夹名修改为 *ConvertToUTF8* ，然后将此文件夹移动到 Sublime Text 的 *Packages* 文件夹下（可通过 Sublime Text 菜单中的 Preferences > Browse Packages 找到 *Packages* 文件夹）。
 
 您的文件夹应该看起来是这样的：
 
-![Folder Hierarchy](http://dl.dropboxusercontent.com/u/31937639/ConvertToUTF8/hierarchy.png)
+![Folder Hierarchy](https://seanliang.github.io/donate/hierarchy.png)
 
 设置
 ------------------
