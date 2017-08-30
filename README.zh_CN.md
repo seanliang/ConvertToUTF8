@@ -2,12 +2,12 @@
 ------------------
 通过本插件，您可以编辑并保存目前编码不被 Sublime Text 支持的文件，特别是中日韩用户使用的 GB2312，GBK，BIG5，EUC-KR，EUC-JP 等。ConvertToUTF8 同时支持 Sublime Text 2 和 3。
 
-![ConvertToUTF8](http://dl.dropboxusercontent.com/u/31937639/ConvertToUTF8/ConvertToUTF8.gif)
+![ConvertToUTF8](https://seanliang.github.io/donate/ConvertToUTF8.gif)
 
-如果您觉得本插件有用并想给予支持，可通过支付宝或Paypal捐助。感谢！:)
+如果您觉得本插件有用并想给予支持，可通过支付宝或微信捐助。感谢！:)
 
-![支付宝钱包扫一下](http://dl.dropboxusercontent.com/u/31937639/alipay_code.png) 或 
-[![PayPal捐助](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=GP6Y25N7Q9E26&lc=US&item_name=Buy%20me%20a%20cup%20of%20coffee&item_number=ConvertToUTF8&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
+![支付宝钱包扫一下](https://seanliang.github.io/donate/ap.png) ![微信扫一下](https://seanliang.github.io/donate/wx.png)
+
 
 注意
 ------------------
