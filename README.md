@@ -6,9 +6,7 @@ With this plugin, you can edit and save the files which encodings are not suppor
 
 If you want to support this plugin, you can donate via Alipay or WeChat. Thanks! :)
 
-![Alipay QR code](https://seanliang.github.io/donate/ap.png)
-
-![WeChat QR code](https://seanliang.github.io/donate/wx.png)
+![Alipay QR code](https://seanliang.github.io/donate/ap.png) ![WeChat QR code](https://seanliang.github.io/donate/wx.png)
 
 Note
 ------------------
