@@ -811,7 +811,7 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 			view.run_command('revert')
 
 	def on_pre_save(self, view):
-		if view.encoding() == 'Hexadecimal':
+		if view.encoding() == 'Hexadecimal' or view.encoding().endswith(' BOM'):
 			return
 		force_encoding = view.settings().get('force_encoding')
 		if force_encoding == 'UTF-8':
