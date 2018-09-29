@@ -6,10 +6,12 @@ import os
 if sys.version_info < (3, 0):
 	from chardet.universaldetector import UniversalDetector
 	NONE_COMMAND = (None, None, 0)
+	CACHE_ROOT = os.path.join(sublime.packages_path(), 'User')
 	ST3 = False
 else:
 	from .chardet.universaldetector import UniversalDetector
 	NONE_COMMAND = ('', None, 0)
+	CACHE_ROOT = os.path.join(sublime.cache_path(), 'ConvertToUTF8')
 	ST3 = True
 import codecs
 import threading
@@ -37,7 +39,7 @@ ENCODINGS_CODE = []
 
 class EncodingCache(object):
 	def __init__(self):
-		self.file = os.path.join(sublime.packages_path(), 'User', 'encoding_cache.json')
+		self.file = os.path.join(CACHE_ROOT, 'encoding_cache.json')
 		self.cache = []
 		self.max_size = -1
 		self.dirty = False
@@ -178,7 +180,7 @@ def init_settings():
 	encoding_cache = EncodingCache()
 	get_settings()
 	sublime.load_settings('ConvertToUTF8.sublime-settings').add_on_change('get_settings', get_settings)
-	TMP_DIR = os.path.join(sublime.packages_path(), 'User', 'c2u_tmp')
+	TMP_DIR = os.path.join(CACHE_ROOT, 'c2u_tmp')
 	if not os.path.exists(TMP_DIR):
 		os.mkdir(TMP_DIR)
 
