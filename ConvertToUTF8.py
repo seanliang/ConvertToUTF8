@@ -3,15 +3,16 @@
 import sublime, sublime_plugin
 import sys
 import os
+is_python2 = False
 if sys.version_info < (3, 0):
 	from chardet.universaldetector import UniversalDetector
 	NONE_COMMAND = (None, None, 0)
-	CACHE_ROOT = os.path.join(sublime.packages_path(), 'User')
+	is_python2 = True
 	ST3 = False
+	plugin_loaded()
 else:
 	from .chardet.universaldetector import UniversalDetector
 	NONE_COMMAND = ('', None, 0)
-	CACHE_ROOT = os.path.join(sublime.cache_path(), 'ConvertToUTF8')
 	ST3 = True
 import codecs
 import threading
@@ -39,6 +40,7 @@ ENCODINGS_CODE = []
 
 class EncodingCache(object):
 	def __init__(self):
+		assert CACHE_ROOT, "CACHE_ROOT is undefined"
 		self.file = os.path.join(CACHE_ROOT, 'encoding_cache.json')
 		self.cache = []
 		self.max_size = -1
@@ -180,9 +182,10 @@ def init_settings():
 	encoding_cache = EncodingCache()
 	get_settings()
 	sublime.load_settings('ConvertToUTF8.sublime-settings').add_on_change('get_settings', get_settings)
+	assert CACHE_ROOT, "CACHE_ROOT is undefined"
 	TMP_DIR = os.path.join(CACHE_ROOT, 'c2u_tmp')
 	if not os.path.exists(TMP_DIR):
-		os.mkdir(TMP_DIR)
+		os.makedirs(TMP_DIR)
 
 def setup_views():
 	clean_temp_folder()
@@ -200,6 +203,12 @@ def setup_views():
 			threading.Thread(target=lambda: detect(view, file_name, cnt)).start()
 
 def plugin_loaded():
+	global CACHE_ROOT
+	if is_python2:
+		CACHE_ROOT = os.path.join(sublime.packages_path(), 'User')
+	else:
+		CACHE_ROOT = os.path.join(sublime.cache_path(), 'ConvertToUTF8')
+
 	init_settings()
 	setup_views()
 
