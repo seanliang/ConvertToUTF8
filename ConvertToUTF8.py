@@ -40,7 +40,6 @@ ENCODINGS_CODE = []
 
 class EncodingCache(object):
 	def __init__(self):
-		assert CACHE_ROOT, "CACHE_ROOT is undefined"
 		self.file = os.path.join(CACHE_ROOT, 'encoding_cache.json')
 		self.cache = []
 		self.max_size = -1
@@ -182,7 +181,6 @@ def init_settings():
 	encoding_cache = EncodingCache()
 	get_settings()
 	sublime.load_settings('ConvertToUTF8.sublime-settings').add_on_change('get_settings', get_settings)
-	assert CACHE_ROOT, "CACHE_ROOT is undefined"
 	TMP_DIR = os.path.join(CACHE_ROOT, 'c2u_tmp')
 	if not os.path.exists(TMP_DIR):
 		os.makedirs(TMP_DIR)
