@@ -1,0 +1,4 @@
+ConvertToUTF8 1.2.12 Changelog
+
+Enhancements
+- [ST3] Using Sublime Text's cache directory (#90 and #92, thanks to @gh640 and @evandrocoan)

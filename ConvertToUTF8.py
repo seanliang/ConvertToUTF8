@@ -6,12 +6,10 @@ import os
 if sys.version_info < (3, 0):
 	from chardet.universaldetector import UniversalDetector
 	NONE_COMMAND = (None, None, 0)
-	CACHE_ROOT = os.path.join(sublime.packages_path(), 'User')
 	ST3 = False
 else:
 	from .chardet.universaldetector import UniversalDetector
 	NONE_COMMAND = ('', None, 0)
-	CACHE_ROOT = os.path.join(sublime.cache_path(), 'ConvertToUTF8')
 	ST3 = True
 import codecs
 import threading
@@ -176,13 +174,17 @@ def clean_temp_folder():
 		os.unlink(tmp_file)
 
 def init_settings():
-	global encoding_cache, TMP_DIR
+	global encoding_cache, TMP_DIR, CACHE_ROOT
+	if ST3:
+		CACHE_ROOT = os.path.join(sublime.cache_path(), 'ConvertToUTF8')
+	else:
+		CACHE_ROOT = os.path.join(sublime.packages_path(), 'User')
+	TMP_DIR = os.path.join(CACHE_ROOT, 'c2u_tmp')
+	if not os.path.exists(TMP_DIR):
+		os.makedirs(TMP_DIR)
 	encoding_cache = EncodingCache()
 	get_settings()
 	sublime.load_settings('ConvertToUTF8.sublime-settings').add_on_change('get_settings', get_settings)
-	TMP_DIR = os.path.join(CACHE_ROOT, 'c2u_tmp')
-	if not os.path.exists(TMP_DIR):
-		os.mkdir(TMP_DIR)
 
 def setup_views():
 	clean_temp_folder()
