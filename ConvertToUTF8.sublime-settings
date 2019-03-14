@@ -12,6 +12,9 @@
 		["UTF-8", "UTF-8"]
 	],
 
+	// Reset diff markers after converting
+	"reset_diff_markers" : true,
+
 	// Maximum size for encoding cache, 0 means no cache
 	"max_cache_size" : 100,
 

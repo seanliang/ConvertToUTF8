@@ -29,15 +29,16 @@ Configuration
 Please check ConvertToUTF8.sublime-settings file for details. You should save your personal settings in a file named "ConvertToUTF8.sublime-settings" under "User" folder. You can set project-specific settings (except encoding_list and max_cache_size) in the .sublime-project file which can be opened via "Project > Edit Project" menu.
 
 * encoding_list: encoding selection list when detection is failed
+* reset_diff_markers: reset diff markers after converting (default: true)
 * max_cache_size: maximum encoding cache size, 0 means no cache (default: 100)
 * max_detect_lines: maximum detection lines, 0 means unlimited (default: 600)
-* preview_action: converting the file's content to UTF-8 when previewing it (default: false)
+* preview_action: convert the file's content to UTF-8 when previewing it (default: false)
 * default_encoding_on_create: specific the default encoding for newly created file (such as "GBK"), empty value means using sublime text's "default_encoding" setting (default: "")
 * convert_on_load: convert the file's content to UTF-8 when it is loaded (default: true)
 * convert_on_save: convert the file's content from UTF-8 to its original (or specific) encoding when it is saved (default: true)
 * convert_on_find: convert the text in Find Results view to UTF-8 (default: false)
 * lazy_reload: save file to a temporary location, and reload it in background when switching to other windows or tabs (default: false)
-* confidence: The minimum confidence rate which the converting will be performed automatic. (default: 0.95)
+* confidence: the minimum confidence rate which the converting will be performed automatic. (default: 0.95)
 
 Usage
 ------------------

@@ -31,6 +31,7 @@ SETTINGS = {}
 REVERTING_FILES = []
 
 CONFIRM_IS_AVAILABLE = ('ok_cancel_dialog' in dir(sublime))
+DIFF_IS_AVAILABLE = ('reset_reference_document' in dir(sublime.View))
 
 ENCODINGS_NAME = []
 ENCODINGS_CODE = []
@@ -138,6 +139,7 @@ def get_settings():
 	SETTINGS['lazy_reload'] = settings.get('lazy_reload', True)
 	SETTINGS['convert_on_find'] = settings.get('convert_on_find', False)
 	SETTINGS['confidence'] = settings.get('confidence', 0.95)
+	SETTINGS['reset_diff_markers'] = settings.get('reset_diff_markers', True)
 
 def get_setting(view, key):
 	# read project specific settings first
@@ -468,6 +470,9 @@ class ConvertToUtf8Command(sublime_plugin.TextCommand):
 		vp = view.viewport_position()
 		view.set_viewport_position((0, 0), False)
 		view.replace(edit, regions, contents)
+		if DIFF_IS_AVAILABLE and get_setting(view, 'reset_diff_markers'):
+			view.reset_reference_document()
+			view.settings().set('origin_content', contents)
 		sel.clear()
 		for x in rs:
 			sel.add(self.find_region(x))
@@ -800,6 +805,8 @@ class ConvertToUTF8Listener(sublime_plugin.EventListener):
 		# st3 will reload file immediately
 		if view.settings().get('revert_to_scratch') or (ST3 and not get_setting(view, 'lazy_reload')):
 			view.set_scratch(True)
+		if DIFF_IS_AVAILABLE and get_setting(view, 'reset_diff_markers'):
+			view.set_reference_document(view.settings().get('origin_content'))
 
 	def on_deactivated(self, view):
 		# st2 will reload file when on_deactivated

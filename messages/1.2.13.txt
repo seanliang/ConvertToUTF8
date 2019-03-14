@@ -1,0 +1,4 @@
+ConvertToUTF8 1.2.13 Changelog
+
+New Features
+- Added "reset_diff_markers" setting for resetting the diff markers in the gutter (defaults to true)

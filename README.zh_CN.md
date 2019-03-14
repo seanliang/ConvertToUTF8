@@ -30,6 +30,7 @@
 请查看 ConvertToUTF8.sublime-settings 文件获取详细信息。为防止更新插件时被覆盖，请将个人设置保存到 User 目录中名为 ConvertToUTF8.sublime-settings 文件中。您可以在 .sublime-project 文件（可通过 Project > Edit Project 打开）中指定项目专属设置（除 encoding_list 和 max_cache_size 外）。
 
 * encoding_list：检测失败时显示的编码列表
+* reset_diff_markers：在转换后重置差异标记（默认为 true）
 * max_cache_size：最大编码缓存数量，0 表示不缓存（默认为 100）
 * max_detect_lines：最大检测行数，0 表示不限制（默认为 600）
 * preview_action：预览文件时是否将其内容转换为 UTF-8（默认为 false）
