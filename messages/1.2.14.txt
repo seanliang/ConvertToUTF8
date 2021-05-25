@@ -1,0 +1,6 @@
+ConvertToUTF8 1.2.14 Changelog
+
+Enhancements
+- Use Python 3.8 in Sublime Text 4
+
+Note: For those who upgrade to Sublime Text 4, please remove or disable Codecs33 plugin which files are included in embedded Python 3.8.

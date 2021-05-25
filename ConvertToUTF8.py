@@ -381,7 +381,7 @@ class PyInstructionCommand(sublime_plugin.TextCommand):
 			branch = self.get_branch(sublime.platform(), sublime.arch())
 			if branch:
 				ver = '33' if ST3 else '26'
-				msg = msg + 'Please install Codecs{0} plugin (https://github.com/seanliang/Codecs{0}/tree/{1}).\n'.format(ver, branch)
+				msg = msg + 'Please install Codecs{0} plugin (https://github.com/seanliang/Codecs{0}/tree/{1}) or upgrade to Sublime Text 4.\n'.format(ver, branch)
 			else:
 				import platform
 				msg = msg + 'Please send the following information to sunlxy (at) yahoo.com:\n====== Debug Information ======\nVersion: {0}-{1}\nPlatform: {2}\nPath: {3}\nEncoding: {4}\n'.format(
