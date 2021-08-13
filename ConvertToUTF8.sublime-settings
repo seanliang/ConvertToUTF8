@@ -1,4 +1,7 @@
 {
+	// Show permanent encoding status in the status bar
+	"show_encoding_status": true,
+
 	// supported encoding list, name & code in pair
 	"encoding_list" : [
 		["Chinese Simplified (GBK)", "GBK"],

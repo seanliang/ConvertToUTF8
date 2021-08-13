@@ -140,6 +140,7 @@ def get_settings():
 	SETTINGS['convert_on_find'] = settings.get('convert_on_find', False)
 	SETTINGS['confidence'] = settings.get('confidence', 0.95)
 	SETTINGS['reset_diff_markers'] = settings.get('reset_diff_markers', True)
+	SETTINGS['show_encoding_status'] = settings.get('show_encoding_status', True)
 
 def get_setting(view, key):
 	# read project specific settings first
@@ -276,6 +277,8 @@ def show_encoding_status(view):
 		if not encoding:
 			return
 	view.set_status('origin_encoding', encoding)
+	if not get_setting(view, 'show_encoding_status'):
+		sublime.set_timeout(lambda: view.set_status('origin_encoding', ''), 3000)
 
 def init_encoding_vars(view, encoding, run_convert=True, stamp=None, detect_on_fail=False):
 	if not encoding:
