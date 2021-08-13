@@ -140,6 +140,7 @@ def get_settings():
 	SETTINGS['convert_on_find'] = settings.get('convert_on_find', False)
 	SETTINGS['confidence'] = settings.get('confidence', 0.95)
 	SETTINGS['reset_diff_markers'] = settings.get('reset_diff_markers', True)
+	SETTINGS['show_encoding_status'] = settings.get('show_encoding_status', True)
 
 def get_setting(view, key):
 	# read project specific settings first
@@ -270,6 +271,9 @@ def check_encoding(view, encoding, confidence):
 	init_encoding_vars(view, encoding)
 
 def show_encoding_status(view):
+	if not get_setting(view, 'show_encoding_status'):
+		view.set_status('origin_encoding', '')
+		return
 	encoding = view.settings().get('force_encoding')
 	if not encoding:
 		encoding = view.settings().get('origin_encoding')
