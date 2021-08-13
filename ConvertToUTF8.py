@@ -271,14 +271,15 @@ def check_encoding(view, encoding, confidence):
 	init_encoding_vars(view, encoding)
 
 def show_encoding_status(view):
+	if not get_setting(view, 'show_encoding_status'):
+		view.set_status('origin_encoding', '')
+		return
 	encoding = view.settings().get('force_encoding')
 	if not encoding:
 		encoding = view.settings().get('origin_encoding')
 		if not encoding:
 			return
 	view.set_status('origin_encoding', encoding)
-	if not get_setting(view, 'show_encoding_status'):
-		sublime.set_timeout(lambda: view.set_status('origin_encoding', ''), 3000)
 
 def init_encoding_vars(view, encoding, run_convert=True, stamp=None, detect_on_fail=False):
 	if not encoding:
