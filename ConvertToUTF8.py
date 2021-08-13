@@ -140,6 +140,7 @@ def get_settings():
 	SETTINGS['convert_on_find'] = settings.get('convert_on_find', False)
 	SETTINGS['confidence'] = settings.get('confidence', 0.95)
 	SETTINGS['reset_diff_markers'] = settings.get('reset_diff_markers', True)
+	SETTINGS['show_encoding_status'] = settings.get('show_encoding_status', True)
 
 def get_setting(view, key):
 	# read project specific settings first
@@ -196,7 +197,7 @@ def setup_views():
 			if not get_setting(view, 'convert_on_load'):
 				break
 			view.settings().set('is_init_dirty_state', view.is_dirty())
-			if view.is_dirty() or view.settings().get('origin_encoding'):
+			if get_setting(view, 'show_encoding_status') and (view.is_dirty() or view.settings().get('origin_encoding')):
 				show_encoding_status(view)
 				continue
 			file_name = view.file_name()
@@ -281,7 +282,8 @@ def init_encoding_vars(view, encoding, run_convert=True, stamp=None, detect_on_f
 	if not encoding:
 		return
 	view.settings().set('origin_encoding', encoding)
-	show_encoding_status(view)
+	if get_setting(view, 'show_encoding_status'):
+		show_encoding_status(view)
 	if encoding in SKIP_ENCODINGS or encoding == view.encoding():
 		encoding_cache.set(view.file_name(), encoding)
 		return
